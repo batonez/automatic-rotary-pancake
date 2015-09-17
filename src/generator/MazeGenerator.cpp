@@ -9,6 +9,12 @@
 #include <strug/generator/MazeGenerator.h>
 #include <strug/controls/StrugController.h>
 
+#ifdef DEBUG_MAZE_GENERATOR
+#define MAZE_LOG(...) log(...)
+#else
+#define MAZE_LOG(...)
+#endif
+
 extern Strug::ResourceManager *game_resource_manager;
 
 const int   MazeGenerator::MAZE_WIDTH  = 16;
@@ -50,14 +56,14 @@ void MazeGenerator::createMaze()
   }
   
   carvePassageAt(entranceX, entranceY);
-  log("Entrance: (%d, %d)", entranceX, entranceY);
+  MAZE_LOG("Entrance: (%d, %d)", entranceX, entranceY);
   // End Generating entrance
   
   // Carving the shit out of this maze
   while (!carvableCells.empty()) {
     dumpCarvableCells();
     int whereToCarve = rand() % carvableCells.size();
-    log("Rolled carve at vector index: %d", whereToCarve);
+    MAZE_LOG("Rolled carve at vector index: %d", whereToCarve);
     
     carvePassageAt(
       carvableCells[whereToCarve].first,
@@ -121,6 +127,7 @@ void MazeGenerator::carveExit(int &exit_x, int &exit_y, int adj_x_offset, int ad
  
     if (cell.passable) {
       carvePassageAt(exit_x, exit_y);
+      exits.push_back(std::pair<int,int>(exit_x, exit_y));
       break;
     }
   }
@@ -131,7 +138,7 @@ void MazeGenerator::carvePassageAt(int cell_x, int cell_y)
   assert(cell_x < MAZE_WIDTH);
   assert(cell_y < MAZE_HEIGHT);
   
-  log("Carving at (%d, %d)", cell_x, cell_y);
+  MAZE_LOG("Carving at (%d, %d)", cell_x, cell_y);
   
   MazeCell carvedCell = {0};
   
@@ -173,13 +180,13 @@ void MazeGenerator::carvePassageAt(int cell_x, int cell_y)
         continue;
       }
       
-      log("Should we remove neighbor (%d, %d) from carvable list? His passable neighbors is %d, and straight neighbor num is %d",
+      MAZE_LOG("Should we remove neighbor (%d, %d) from carvable list? His passable neighbors is %d, and straight neighbor num is %d",
         i, j, neighbor.passableNeighbors, neighbor.passableStraightNeighborsNumber);
-      log("Mask test (top, left, bottom, right): %d, %d, %d, %d", neighbor.passableNeighbors & MazeGenerator::TOP_NEIGHBOR, neighbor.passableNeighbors & MazeGenerator::LEFT_NEIGHBOR, neighbor.passableNeighbors & MazeGenerator::BOTTOM_NEIGHBOR, neighbor.passableNeighbors & MazeGenerator::RIGHT_NEIGHBOR);
+      MAZE_LOG("Mask test (top, left, bottom, right): %d, %d, %d, %d", neighbor.passableNeighbors & MazeGenerator::TOP_NEIGHBOR, neighbor.passableNeighbors & MazeGenerator::LEFT_NEIGHBOR, neighbor.passableNeighbors & MazeGenerator::BOTTOM_NEIGHBOR, neighbor.passableNeighbors & MazeGenerator::RIGHT_NEIGHBOR);
       
       // Cells that have standalone corner neighbors are not carvable
       if (neighbor.passableNeighbors & MazeGenerator::TOPLEFT_NEIGHBOR) {
-        log("Found a topleft carved neighbor for (%d, %d)", i, j);
+        MAZE_LOG("Found a topleft carved neighbor for (%d, %d)", i, j);
         if ((neighbor.passableNeighbors & MazeGenerator::TOP_NEIGHBOR) == 0
           && (neighbor.passableNeighbors & MazeGenerator::LEFT_NEIGHBOR) == 0) {
             removeFromCarvableList(i, j);
@@ -188,7 +195,7 @@ void MazeGenerator::carvePassageAt(int cell_x, int cell_y)
       }
       
       if (neighbor.passableNeighbors & MazeGenerator::TOPRIGHT_NEIGHBOR) {
-        log("Found a topright carved neighbor for (%d, %d)", i, j);
+        MAZE_LOG("Found a topright carved neighbor for (%d, %d)", i, j);
         if ((neighbor.passableNeighbors & MazeGenerator::TOP_NEIGHBOR) == 0
           && (neighbor.passableNeighbors & MazeGenerator::RIGHT_NEIGHBOR) == 0) {
             removeFromCarvableList(i, j);
@@ -197,7 +204,7 @@ void MazeGenerator::carvePassageAt(int cell_x, int cell_y)
       }
 
       if (neighbor.passableNeighbors & MazeGenerator::BOTTOMRIGHT_NEIGHBOR) {
-        log("Found a bottomright carved neighbor for (%d, %d)", i, j);
+        MAZE_LOG("Found a bottomright carved neighbor for (%d, %d)", i, j);
         if ((neighbor.passableNeighbors & MazeGenerator::BOTTOM_NEIGHBOR) == 0
           && (neighbor.passableNeighbors & MazeGenerator::RIGHT_NEIGHBOR) == 0) {
             removeFromCarvableList(i, j);
@@ -206,7 +213,7 @@ void MazeGenerator::carvePassageAt(int cell_x, int cell_y)
       }
       
       if (neighbor.passableNeighbors & MazeGenerator::BOTTOMLEFT_NEIGHBOR) {
-        log("Found a bottomleft carved neighbor for (%d, %d)", i, j);
+        MAZE_LOG("Found a bottomleft carved neighbor for (%d, %d)", i, j);
         if ((neighbor.passableNeighbors & MazeGenerator::BOTTOM_NEIGHBOR) == 0
           && (neighbor.passableNeighbors & MazeGenerator::LEFT_NEIGHBOR) == 0) {
             removeFromCarvableList(i, j);
@@ -236,7 +243,7 @@ void MazeGenerator::addToCarvableList(int cell_x, int cell_y)
 
 void MazeGenerator::removeFromCarvableList(int cell_x, int cell_y)
 {
-  log("Removing (%d, %d) from carvable list", cell_x, cell_y);
+  MAZE_LOG("Removing (%d, %d) from carvable list", cell_x, cell_y);
   
   VectorOfIntPairs::iterator cellCoords =
     std::find(carvableCells.begin(), carvableCells.end(), std::pair<int,int>(cell_x, cell_y));
@@ -262,7 +269,7 @@ MazeGenerator::MazeCell MazeGenerator::updateNeighborCell(int carved_cell_x, int
   int xDiff =  carved_cell_x - neighbor_cell_x;
   int yDiff =  carved_cell_y - neighbor_cell_y;
   
-  log("Updating neighbors... carved cell (%d, %d), neighbor cell (%d, %d), xDiff = %d, yDiff = %d",
+  MAZE_LOG("Updating neighbors... carved cell (%d, %d), neighbor cell (%d, %d), xDiff = %d, yDiff = %d",
     carved_cell_x, carved_cell_y, neighbor_cell_x, neighbor_cell_y, xDiff, yDiff);
   
   assert(xDiff != 0 || yDiff != 0);
@@ -306,4 +313,25 @@ bool MazeGenerator::isCellPassable(int cell_x, int cell_y)
   } catch (std::out_of_range &e) {}
   
   return result;
+}
+
+MazeGenerator::MazeCell MazeGenerator::getCellAt(int cell_x, int cell_y)
+{
+  try {
+    return  mazeMap.at(std::pair<int,int>(cell_x, cell_y));
+  } catch (std::out_of_range &e) {
+    MazeCell cell = {0};
+    return cell;
+  }
+}
+
+void MazeGenerator::dumpCarvableCells()
+{
+  MAZE_LOG("========== CARVABLE CELLS ==========:");
+  
+  for (VectorOfIntPairs::iterator i = carvableCells.begin(); i != carvableCells.end(); ++i) {
+    MAZE_LOG("(%d, %d)", i->first, i->second);
+  }
+  
+  MAZE_LOG("========== END CARVABLE CELLS ==========");
 }

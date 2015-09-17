@@ -5,6 +5,7 @@
 
 #include <glade/math/Vector.h>
 #include <glade/debug/log.h>
+#include <strug/exception/StrugException.h>
 
 class MazeGenerator
 {
@@ -46,6 +47,7 @@ class MazeGenerator
 
     MazeMap mazeMap;
     VectorOfIntPairs carvableCells;
+    VectorOfIntPairs exits;
 
   public:
     MazeGenerator();
@@ -53,6 +55,21 @@ class MazeGenerator
     
     void createMaze();
     bool isCellPassable(int cell_x, int cell_y);
+    MazeCell getCellAt(int cell_x, int cell_y);
+    
+    int getNumberOfExits()
+    {
+      return exits.size();
+    }
+    
+    std::pair<int,int> getExit(int index)
+    {
+      try {
+        return exits.at(index);
+      } catch (std::out_of_range &e) {
+        throw StrugException("Exit index is out of range");
+      }
+    }
 
   private:
     bool isEdgeCell(int cell_x, int cell_y)
@@ -64,17 +81,7 @@ class MazeGenerator
     {
       mazeMap.clear();
       carvableCells.clear();
-    }
-
-    void dumpCarvableCells()
-    {
-      log("========== CARVABLE CELLS ==========:");
-      
-      for (VectorOfIntPairs::iterator i = carvableCells.begin(); i != carvableCells.end(); ++i) {
-        log("(%d, %d)", i->first, i->second);
-      }
-      
-      log("========== END CARVABLE CELLS ==========");
+      exits.clear();
     }
     
     // True example (X - this cell, O - carved cell, * - uncarved cell):
@@ -101,4 +108,5 @@ class MazeGenerator
     void addToCarvableList(int cell_x, int cell_y);
     void removeFromCarvableList(int cell_x, int cell_y);
     void carveExit(int &exit_x, int &exit_y, int adj_x_offset, int adj_y_offset, int &random_coord, int dim);
+    void dumpCarvableCells();
 };
