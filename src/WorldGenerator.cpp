@@ -78,61 +78,87 @@ static void fillHorizontalSymmetricalPassageWithSteepness(Area *area, int maxPas
 
 //==============================================================================
 
-static void fillVerticalLine()
+static void calculateVerticalTerrainLine(
+  /*out*/ int &bottom_terrain_height,
+  /*out*/ int &top_terrain_height,
+  int area_height,
+  int max_passage_height,
+  int min_passage_height,
+  int from_top_height,
+  int from_bottom_height,
+  int top_steepness,
+  int bottom_steepness
+)
 {
+  if (!from_bottom_height) {
+    bottom_terrain_height = ::rand() % (area_height - min_passage_height - 1) + 1;
+  } else {
+    int range;
+    
+    if (from_bottom_height - bottom_steepness < 1) {
+      range = bottom_steepness + 1;
+    } else {
+      range = bottom_steepness * 2 + 1;
+    }
   
+    bottom_terrain_height = std::min<int>(
+      ::rand() % (range) + std::max<int>(from_bottom_height - bottom_steepness, 1),
+      area_height - from_top_height - min_passage_height - (from_top_height ? 0 : 1)
+    );
+  }
+
+  int spaceLeft = area_height - bottom_terrain_height;
+
+  if (!from_top_height) {
+    top_terrain_height = ::rand() % (area_height - bottom_terrain_height - min_passage_height) + 1;
+  } else {
+    int range;
+    
+    if (from_top_height - top_steepness < 1) {
+      range = top_steepness + 1;
+    } else {
+      range = top_steepness * 2 + 1;
+    }
+    
+    top_terrain_height = std::min<int>(
+      ::rand() % (range) + std::max<int>(from_top_height - top_steepness, 1),
+      std::min<int>(
+        area_height - from_bottom_height - min_passage_height,
+        spaceLeft - min_passage_height
+      )
+    );
+  }
 }
 
 static void fillHorizontalPassage(
-  Area *area, int maxPassageHeight, int from_top_height = 0,
-  int from_bottom_height = 0, int minPassageHeight = 1, int topSteepness = 2,
-  int bottomSteepness = 2)
+  Area *area,
+  int   max_passage_height,
+  int   from_top_height    = 0,
+  int   from_bottom_height = 0,
+  int   min_passage_height = 1,
+  int   top_steepness      = 2,
+  int   bottom_steepness   = 2
+)
 {
-  int bottomTerrainHeight;
-  int topTerrainHeight;
   int previousBottomTerrainHeight = from_bottom_height;
   int previousTopTerrainHeight = from_top_height;
+  int bottomTerrainHeight, topTerrainHeight;
   
-  for (int i = 0; i < area->getWidthInBlocks(); ++i) {
-    if (!previousBottomTerrainHeight) {
-      bottomTerrainHeight = ::rand() % (area->getHeightInBlocks() - minPassageHeight - 1) + 1;
-    } else {
-      int range;
-      
-      if (previousBottomTerrainHeight - bottomSteepness < 1) {
-        range = bottomSteepness + 1;
-      } else {
-        range = bottomSteepness * 2 + 1;
-      }
+  // save area attr
+  
+  for (int i = 0; i < area->getWidthInBlocks(); ++i) {  
+    calculateVerticalTerrainLine(
+      bottomTerrainHeight,
+      topTerrainHeight,
+      area->getHeightInBlocks(),
+      max_passage_height,
+      min_passage_height,
+      previousTopTerrainHeight,
+      previousBottomTerrainHeight,
+      top_steepness,
+      bottom_steepness
+    );
     
-      bottomTerrainHeight = std::min<int>(
-        ::rand() % (range) + std::max<int>(previousBottomTerrainHeight - bottomSteepness, 1),
-        area->getHeightInBlocks() - previousTopTerrainHeight - minPassageHeight - (previousTopTerrainHeight ? 0 : 1)
-      );
-    }
-  
-    int spaceLeft = area->getHeightInBlocks() - bottomTerrainHeight;
-  
-    if (!previousTopTerrainHeight) {
-      topTerrainHeight = ::rand() % (area->getHeightInBlocks() - bottomTerrainHeight - minPassageHeight) + 1;
-    } else {
-      int range;
-      
-      if (previousTopTerrainHeight - topSteepness < 1) {
-        range = topSteepness + 1;
-      } else {
-        range = topSteepness * 2 + 1;
-      }
-      
-      topTerrainHeight = std::min<int>(
-        ::rand() % (range) + std::max<int>(previousTopTerrainHeight - topSteepness, 1),
-        std::min<int>(
-          area->getHeightInBlocks() - previousBottomTerrainHeight - minPassageHeight,
-          spaceLeft - minPassageHeight
-        )
-      );
-    }
-  
     for (int j = 0; j < area->getHeightInBlocks(); ++j) {    
       if (j < topTerrainHeight || j >= area->getHeightInBlocks() - bottomTerrainHeight) {
         area->add(new Terrain(), i, j);
@@ -142,6 +168,8 @@ static void fillHorizontalPassage(
     previousBottomTerrainHeight = bottomTerrainHeight;
     previousTopTerrainHeight = topTerrainHeight;
   }
+  
+  // save area attr
 }
 
 //==============================================================================
