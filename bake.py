@@ -11,9 +11,10 @@ os.path.join(os.environ['HATCHERY_SOURCES'], 'lodepng'),
 baker.compilerOutputDir = os.path.join(os.environ['HATCHERY_BUILDS'], 'strug', 'obj')
 
 baker.compilerIncludes.extend([
-os.path.join(os.environ['HATCHERY_SOURCES'], 'strug' , 'include'),
-os.path.join(os.environ['HATCHERY_SOURCES'], 'Gladen', 'include'),
-os.path.join(os.environ['HATCHERY_TOOLS']  , 'OpenGL', 'include'),
+os.path.join(os.environ['HATCHERY_SOURCES'], 'strug'  , 'include'),
+os.path.join(os.environ['HATCHERY_SOURCES'], 'Gladen' , 'include'),
+os.path.join(os.environ['HATCHERY_TOOLS']  , 'OpenGL' , 'include'),
+os.path.join(os.environ['HATCHERY_SOURCES'], 'sha1'),
 ])
 
 baker.compilerSources = [
@@ -35,6 +36,7 @@ os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'blocks', 'Block.cp
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'blocks', 'Character.cpp'),
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'blocks', 'Player.cpp'),
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'main.cpp'),
+os.path.join(os.environ['HATCHERY_SOURCES'], 'sha1',  'sha1.cpp'),
 ]
 
 ######################## Linker

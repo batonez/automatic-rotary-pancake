@@ -8,6 +8,8 @@
 #include <strug/states/Play.h>
 #include <strug/controls/StrugController.h>
 
+#define DEBUG_GENERATOR 1
+
 extern Strug::ResourceManager *game_resource_manager;
 
 const float Play::BASE_RUNNING_SPEED = 0.5f;
@@ -91,7 +93,8 @@ Play::Play():
   screenScaleX(0),
   screenScaleY(0),
   controller(NULL),
-  player(NULL)
+  player(NULL),
+  generator(31337)
 {}
 
 Play::~Play()

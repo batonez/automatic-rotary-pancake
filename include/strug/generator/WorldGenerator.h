@@ -29,11 +29,11 @@ class WorldGenerator
   MazeGenerator mazeGenerator;
     
   private:
-    long seed;
-    
+    unsigned int seed;
+
   public:
-    WorldGenerator(const long seed_param = 0);
-    void setSeed(const long seed_param = 0);
+    WorldGenerator(const unsigned int seed_param = 0);
+    void setSeed(const unsigned int seed_param = 0);
     void fillArea(Area *area, AreaMap &map, int area_x, int area_y, AreaType type);
     void createMaze();
 };

@@ -4,6 +4,8 @@
 #include <assert.h>
 #include <limits.h>
 
+#include <sha1.h>
+
 #include <glade/debug/log.h>
 #include <glade/math/vector.h>
 #include <strug/Level.h>
@@ -19,29 +21,35 @@
 #define MIN_PASSAGE_HEIGHT 4
 #define MAX_PASSAGE_HEIGHT 14
 
-static unsigned int getCombinedSeed(long seed, int x, int y)
+static unsigned int getAreaSeed(long seed_param, int x_param, int y_param)
 {
-  log("INT MIN: %d, INT MAX: %d, UINT_MAX: %ud", INT_MIN, INT_MAX, UINT_MAX);
+  struct CombinedData
+  {
+     long seed;
+     int  x;
+     int  y;
+  } data = {seed_param, x_param, y_param };
   
-  long long foo = 429496734297;
-  int bar = (int) foo;
-  log ("LL TO INT: %d", bar);
-  return 0;
+  union Sha1Digest
+  {
+    unsigned char chars[20];
+    unsigned int combinedSeed;
+  } result;
+  
+  sha1::calc(&data, sizeof(data), result.chars);
+
+  return result.combinedSeed;
 }
 
-WorldGenerator::WorldGenerator(long seed_param)
+WorldGenerator::WorldGenerator(unsigned int seed_param)
 {
   setSeed(seed_param);
 }
 
-void WorldGenerator::setSeed(long seed_param)
+void WorldGenerator::setSeed(unsigned int seed_param)
 {
-  if (!seed_param) {
-    seed = ::time(NULL);
-  }
-  
-  log("World generator seed is %ld", seed);
-  ::srand(seed);
+  seed = seed_param ? seed_param : (unsigned int) ::time(NULL);
+  log("World generator seed is %u", seed);
 }
 
 void WorldGenerator::createMaze()
@@ -52,7 +60,9 @@ void WorldGenerator::createMaze()
 
 void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, AreaType type)
 {
-  /*::srand(*/getCombinedSeed(seed, area_x, area_y)/*)*/;
+  unsigned int combinedSeed = getAreaSeed(seed, area_x, area_y);
+  log("Combined seed for this area is (%u + %d + %d) = %u", seed, area_x, area_y, combinedSeed);
+  ::srand(combinedSeed);
   
   area->texturePackName = "cave";
 
