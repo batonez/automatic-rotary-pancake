@@ -137,87 +137,87 @@ void GeneratorTest::init(Context &context)
   // addMoreAreas(context, playerAreaCoord, playerAreaCoord);
   
   
-  addArea(context, 0, 0, WorldGenerator::PASSAGE_HORIZONTAL);
+  addArea(context, 0, 0, MazeGenerator::PASSAGE_HORIZONTAL);
   
   // Г-образные
    
 /*  
-  addArea(context, 0, 0, WorldGenerator::PASSAGE_HORIZONTAL);
-  addArea(context, 1, 1, WorldGenerator::PASSAGE_VERTICAL);
-  addArea(context, 1, 0, WorldGenerator::PASSAGE_LEFT_TO_BOTTOM);
+  addArea(context, 0, 0, MazeGenerator::PASSAGE_HORIZONTAL);
+  addArea(context, 1, 1, MazeGenerator::PASSAGE_VERTICAL);
+  addArea(context, 1, 0, MazeGenerator::PASSAGE_LEFT_TO_BOTTOM);
 
-  addArea(context, 0, 0, WorldGenerator::PASSAGE_HORIZONTAL);
-  addArea(context, 1, -1, WorldGenerator::PASSAGE_VERTICAL);
-  addArea(context, 1, 0, WorldGenerator::PASSAGE_LEFT_TO_TOP);
+  addArea(context, 0, 0, MazeGenerator::PASSAGE_HORIZONTAL);
+  addArea(context, 1, -1, MazeGenerator::PASSAGE_VERTICAL);
+  addArea(context, 1, 0, MazeGenerator::PASSAGE_LEFT_TO_TOP);
  
-  addArea(context, 0, 0, WorldGenerator::PASSAGE_VERTICAL);
-  addArea(context, 1, 1, WorldGenerator::PASSAGE_HORIZONTAL);
-  addArea(context, 0, 1, WorldGenerator::PASSAGE_TOP_TO_RIGHT);
+  addArea(context, 0, 0, MazeGenerator::PASSAGE_VERTICAL);
+  addArea(context, 1, 1, MazeGenerator::PASSAGE_HORIZONTAL);
+  addArea(context, 0, 1, MazeGenerator::PASSAGE_TOP_TO_RIGHT);
  
-  addArea(context, 1, 0, WorldGenerator::PASSAGE_HORIZONTAL);
-  addArea(context, 0, 1, WorldGenerator::PASSAGE_VERTICAL);
-  addArea(context, 0, 0, WorldGenerator::PASSAGE_BOTTOM_TO_RIGHT);
+  addArea(context, 1, 0, MazeGenerator::PASSAGE_HORIZONTAL);
+  addArea(context, 0, 1, MazeGenerator::PASSAGE_VERTICAL);
+  addArea(context, 0, 0, MazeGenerator::PASSAGE_BOTTOM_TO_RIGHT);
 */
 
   // Ромб
 /*
-  addArea(context, 0, 0, WorldGenerator::PASSAGE_BOTTOM_TO_RIGHT);
-  addArea(context, 1, 0, WorldGenerator::PASSAGE_LEFT_TO_BOTTOM);
-  addArea(context, 1, 1, WorldGenerator::PASSAGE_LEFT_TO_TOP);
-  addArea(context, 0, 1, WorldGenerator::PASSAGE_TOP_TO_RIGHT);
+  addArea(context, 0, 0, MazeGenerator::PASSAGE_BOTTOM_TO_RIGHT);
+  addArea(context, 1, 0, MazeGenerator::PASSAGE_LEFT_TO_BOTTOM);
+  addArea(context, 1, 1, MazeGenerator::PASSAGE_LEFT_TO_TOP);
+  addArea(context, 0, 1, MazeGenerator::PASSAGE_TOP_TO_RIGHT);
 */
 
   // Наклонная
 /*
-  addArea(context, 0, 0, WorldGenerator::PASSAGE_BOTTOM_TO_RIGHT);
-  addArea(context, 1, 0, WorldGenerator::PASSAGE_LEFT_TO_TOP);
-  addArea(context, 1, -1, WorldGenerator::PASSAGE_BOTTOM_TO_RIGHT);
-  addArea(context, 2, -1, WorldGenerator::PASSAGE_LEFT_TO_TOP);
-  addArea(context, 2, -2, WorldGenerator::PASSAGE_BOTTOM_TO_RIGHT);
+  addArea(context, 0, 0, MazeGenerator::PASSAGE_BOTTOM_TO_RIGHT);
+  addArea(context, 1, 0, MazeGenerator::PASSAGE_LEFT_TO_TOP);
+  addArea(context, 1, -1, MazeGenerator::PASSAGE_BOTTOM_TO_RIGHT);
+  addArea(context, 2, -1, MazeGenerator::PASSAGE_LEFT_TO_TOP);
+  addArea(context, 2, -2, MazeGenerator::PASSAGE_BOTTOM_TO_RIGHT);
 */ 
 
   // Т-образные
   /*
-  addArea(context, 1, 0, WorldGenerator::PASSAGE_HORIZONTAL);
-  addArea(context, -1, 0, WorldGenerator::PASSAGE_HORIZONTAL);
-  addArea(context, 0, 1, WorldGenerator::PASSAGE_VERTICAL);
-  addArea(context, 0, 0, WorldGenerator::PASSAGE_TCROSS_BLIND_TOP);
+  addArea(context, 1, 0, MazeGenerator::PASSAGE_HORIZONTAL);
+  addArea(context, -1, 0, MazeGenerator::PASSAGE_HORIZONTAL);
+  addArea(context, 0, 1, MazeGenerator::PASSAGE_VERTICAL);
+  addArea(context, 0, 0, MazeGenerator::PASSAGE_TCROSS_BLIND_TOP);
 
-  addArea(context, 1, 0, WorldGenerator::PASSAGE_HORIZONTAL);
-  addArea(context, -1, 0, WorldGenerator::PASSAGE_HORIZONTAL);
-  addArea(context, 0, -1, WorldGenerator::PASSAGE_VERTICAL);
-  addArea(context, 0, 0, WorldGenerator::PASSAGE_TCROSS_BLIND_BOTTOM);
+  addArea(context, 1, 0, MazeGenerator::PASSAGE_HORIZONTAL);
+  addArea(context, -1, 0, MazeGenerator::PASSAGE_HORIZONTAL);
+  addArea(context, 0, -1, MazeGenerator::PASSAGE_VERTICAL);
+  addArea(context, 0, 0, MazeGenerator::PASSAGE_TCROSS_BLIND_BOTTOM);
 
-  addArea(context, -1,  0, WorldGenerator::PASSAGE_HORIZONTAL);
-  addArea(context,  0,  1, WorldGenerator::PASSAGE_VERTICAL);
-  addArea(context,  0, -1, WorldGenerator::PASSAGE_VERTICAL);
-  addArea(context,  0,  0, WorldGenerator::PASSAGE_TCROSS_BLIND_RIGHT);
+  addArea(context, -1,  0, MazeGenerator::PASSAGE_HORIZONTAL);
+  addArea(context,  0,  1, MazeGenerator::PASSAGE_VERTICAL);
+  addArea(context,  0, -1, MazeGenerator::PASSAGE_VERTICAL);
+  addArea(context,  0,  0, MazeGenerator::PASSAGE_TCROSS_BLIND_RIGHT);
   
-  addArea(context,  1,  0, WorldGenerator::PASSAGE_HORIZONTAL);
-  addArea(context,  0,  1, WorldGenerator::PASSAGE_VERTICAL);
-  addArea(context,  0, -1, WorldGenerator::PASSAGE_VERTICAL);
-  addArea(context,  0,  0, WorldGenerator::PASSAGE_TCROSS_BLIND_LEFT);
+  addArea(context,  1,  0, MazeGenerator::PASSAGE_HORIZONTAL);
+  addArea(context,  0,  1, MazeGenerator::PASSAGE_VERTICAL);
+  addArea(context,  0, -1, MazeGenerator::PASSAGE_VERTICAL);
+  addArea(context,  0,  0, MazeGenerator::PASSAGE_TCROSS_BLIND_LEFT);
 */
 
   // Крестообразный
   
 /*  
-  addArea(context,   1,  0, WorldGenerator::PASSAGE_HORIZONTAL);
-  addArea(context,  -1,  0, WorldGenerator::PASSAGE_HORIZONTAL);
-  addArea(context,   0,  1, WorldGenerator::PASSAGE_VERTICAL);
-  addArea(context,   0, -1, WorldGenerator::PASSAGE_VERTICAL);
-  addArea(context,   0,  0, WorldGenerator::PASSAGE_XCROSS);
+  addArea(context,   1,  0, MazeGenerator::PASSAGE_HORIZONTAL);
+  addArea(context,  -1,  0, MazeGenerator::PASSAGE_HORIZONTAL);
+  addArea(context,   0,  1, MazeGenerator::PASSAGE_VERTICAL);
+  addArea(context,   0, -1, MazeGenerator::PASSAGE_VERTICAL);
+  addArea(context,   0,  0, MazeGenerator::PASSAGE_XCROSS);
 */  
   // Setup controls
   controller = new CharacterController(context, *this);
   context.setController(*controller);
 }
 
-void GeneratorTest::addArea(Context &context, int area_x, int area_y, WorldGenerator::AreaType type)
+void GeneratorTest::addArea(Context &context, int area_x, int area_y, MazeGenerator::CellType type)
 {
   log("GENERATING AREA (%d, %d)", area_x, area_y);
   Area *area = new Area(Level::AREA_WIDTH_BLOCKS);
-  generator.fillArea(area, areaMap, area_x, area_y, type);
+  generator.fillArea(area, area_x, area_y, type);
   
   // initializing blocks and their game mechanics
   for (int blockX = 0; blockX < area->getWidthInBlocks(); ++blockX) {
@@ -295,7 +295,7 @@ void GeneratorTest::addMoreAreas(Context &context, int area_x, int area_y)
   for (int i = areaXFrom; i <= areaXTo; ++i) {
     for (int j = areaYFrom; j <= areaYTo; ++j) {
       if (!areaMap.count(std::pair<int,int>(i, j))) {
-        addArea(context, i, j, WorldGenerator::PASSAGE_HORIZONTAL);
+        addArea(context, i, j, MazeGenerator::PASSAGE_HORIZONTAL);
       }
     }
   }

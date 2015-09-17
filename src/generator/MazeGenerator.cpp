@@ -119,7 +119,7 @@ void MazeGenerator::carveExit(int &exit_x, int &exit_y, int adj_x_offset, int ad
   for (int i = 0; i < MAX_EXIT_CARVE_ATTEMPTS; ++i) {
     random_coord = ::rand() % (dim - 1) + 1;
     
-    MazeCell cell = {0};
+    MazeCell cell;
     
     try {
       cell = mazeMap.at(std::pair<int,int>(exit_x + adj_x_offset, exit_y + adj_y_offset));
@@ -140,7 +140,7 @@ void MazeGenerator::carvePassageAt(int cell_x, int cell_y)
   
   MAZE_LOG("Carving at (%d, %d)", cell_x, cell_y);
   
-  MazeCell carvedCell = {0};
+  MazeCell carvedCell;
   
   try {
     carvedCell = mazeMap.at(std::pair<int,int>(cell_x, cell_y));
@@ -259,7 +259,7 @@ MazeGenerator::MazeCell MazeGenerator::updateNeighborCell(int carved_cell_x, int
   assert(neighbor_cell_y >= 0 && neighbor_cell_y < MAZE_HEIGHT);
   
   // fetch the cell from the maze map or create if not exists
-  MazeCell neighborCell = {0};
+  MazeCell neighborCell;
   
   try {
     neighborCell = mazeMap.at(std::pair<int,int>(neighbor_cell_x, neighbor_cell_y));
@@ -320,7 +320,7 @@ MazeGenerator::MazeCell MazeGenerator::getCellAt(int cell_x, int cell_y)
   try {
     return  mazeMap.at(std::pair<int,int>(cell_x, cell_y));
   } catch (std::out_of_range &e) {
-    MazeCell cell = {0};
+    MazeCell cell;
     return cell;
   }
 }

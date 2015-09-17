@@ -22,12 +22,109 @@ class MazeGenerator
       BOTTOMRIGHT_NEIGHBOR = 128,
     };
     
-    struct MazeCell
+    enum CellType
     {
-      bool passable;
-      // bitmask of NEIGHBOR_CELLS
-      unsigned char passableNeighbors;
-      unsigned char passableStraightNeighborsNumber;
+      // unpassable cell
+      PASSAGE_NO,
+      // surrounded by unpassable cells
+      PASSAGE_ISOLATED_ROOM,
+      // straight
+      PASSAGE_HORIZONTAL,
+      PASSAGE_HORIZONTAL_BLIND_LEFT,
+      PASSAGE_HORIZONTAL_BLIND_RIGHT,
+      PASSAGE_VERTICAL,
+      PASSAGE_VERTICAL_BLIND_TOP,
+      PASSAGE_VERTICAL_BLIND_BOTTOM,
+      // Turns
+      PASSAGE_LEFT_TO_BOTTOM, PASSAGE_BOTTOM_TO_LEFT,
+      PASSAGE_LEFT_TO_TOP, PASSAGE_TOP_TO_LEFT,
+      PASSAGE_BOTTOM_TO_RIGHT, PASSAGE_RIGHT_TO_BOTTOM,
+      PASSAGE_TOP_TO_RIGHT, PASSAGE_RIGHT_TO_TOP,
+      // Intersections
+      PASSAGE_TCROSS_BLIND_TOP,
+      PASSAGE_TCROSS_BLIND_BOTTOM,
+      PASSAGE_TCROSS_BLIND_LEFT,
+      PASSAGE_TCROSS_BLIND_RIGHT,
+      PASSAGE_XCROSS,
+      // Default
+      PASSAGE_UNKNOWN,
+    };
+    
+    class MazeCell
+    {
+      public:
+        bool passable;
+        // bitmask of NEIGHBOR_CELLS
+        unsigned char passableNeighbors;
+        unsigned char passableStraightNeighborsNumber;
+        
+      private:
+        CellType type;
+      
+      public:
+        MazeCell():
+          passable(false),
+          passableNeighbors(0),
+          passableStraightNeighborsNumber(0),
+          type(MazeGenerator::PASSAGE_UNKNOWN)
+        {}
+        
+        CellType getType()
+        {
+          if (type != MazeGenerator::PASSAGE_UNKNOWN) {
+            return type;
+          }
+          
+          if (!passable) {
+            type = MazeGenerator::PASSAGE_NO;
+          } else if (passableStraightNeighborsNumber == 4) {
+            type = MazeGenerator::PASSAGE_XCROSS;
+          } else if (passableStraightNeighborsNumber == 3) {
+            if (!(passableNeighbors & MazeGenerator::TOP_NEIGHBOR)) {
+              type = MazeGenerator::PASSAGE_TCROSS_BLIND_TOP;
+            } else if (!(passableNeighbors & MazeGenerator::BOTTOM_NEIGHBOR)) {
+              type = MazeGenerator::PASSAGE_TCROSS_BLIND_BOTTOM;
+            } else if (!(passableNeighbors & MazeGenerator::LEFT_NEIGHBOR)) {
+              type = MazeGenerator::PASSAGE_TCROSS_BLIND_LEFT;
+            } else if (!(passableNeighbors & MazeGenerator::RIGHT_NEIGHBOR)) {
+              type = MazeGenerator::PASSAGE_TCROSS_BLIND_RIGHT;
+            }
+          } else if (passableStraightNeighborsNumber == 2) {
+            if (passableNeighbors & MazeGenerator::LEFT_NEIGHBOR) {
+              if (passableNeighbors & MazeGenerator::RIGHT_NEIGHBOR) {
+                type = MazeGenerator::PASSAGE_HORIZONTAL;
+              } else if (passableNeighbors & MazeGenerator::TOP_NEIGHBOR) {
+                type = MazeGenerator::PASSAGE_LEFT_TO_TOP;
+              } else if (passableNeighbors & MazeGenerator::BOTTOM_NEIGHBOR) {
+                type = MazeGenerator::PASSAGE_LEFT_TO_BOTTOM;
+              } else {
+                
+              }
+            } else if (passableNeighbors & MazeGenerator::RIGHT_NEIGHBOR) {
+              if (passableNeighbors & MazeGenerator::TOP_NEIGHBOR) {
+                type = MazeGenerator::PASSAGE_TOP_TO_RIGHT;
+              } else if (passableNeighbors & MazeGenerator::BOTTOM_NEIGHBOR) {
+                type = MazeGenerator::PASSAGE_BOTTOM_TO_RIGHT;
+              }
+            } else if (passableNeighbors & MazeGenerator::TOP_NEIGHBOR) {
+              type = MazeGenerator::PASSAGE_VERTICAL;
+            }
+          } else if (passableStraightNeighborsNumber == 1) {
+            if (passableNeighbors & MazeGenerator::LEFT_NEIGHBOR) {
+              type = MazeGenerator::PASSAGE_HORIZONTAL_BLIND_RIGHT;
+            } else if (passableNeighbors & MazeGenerator::RIGHT_NEIGHBOR) {
+              type = MazeGenerator::PASSAGE_HORIZONTAL_BLIND_LEFT;
+            } else if (passableNeighbors & MazeGenerator::TOP_NEIGHBOR) {
+              type = MazeGenerator::PASSAGE_VERTICAL_BLIND_BOTTOM;
+            } else if (passableNeighbors & MazeGenerator::BOTTOM_NEIGHBOR) {
+              type = MazeGenerator::PASSAGE_VERTICAL_BLIND_TOP;
+            }
+          } else if (passableStraightNeighborsNumber == 0) {
+            type = MazeGenerator::PASSAGE_ISOLATED_ROOM;
+          }
+          
+          return type;
+        }
     };
 
     static const int   MAZE_WIDTH, MAZE_HEIGHT;

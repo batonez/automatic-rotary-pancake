@@ -56,6 +56,6 @@ class Play: public State
       int getBlockCoordY(Block &object);
       int areaCoordFromBlockCoord(int blockCoord);
       void applyStartingRulesForBlock(Block &block, int block_x, int block_y);
-      void addArea(Context &context, int area_x, int area_y, WorldGenerator::AreaType type);
+      void addArea(Context &context, int area_x, int area_y, MazeGenerator::CellType type);
       void addMoreAreas(Context &context, int area_x, int area_y);
 };

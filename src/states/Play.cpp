@@ -123,8 +123,8 @@ void Play::init(Context &context)
   // set actual speeds
   runningSpeed = BASE_RUNNING_SPEED * blockWidth;
   
-  generator.mazeGenerator.createMaze();
-
+  generator.createMazeCluster(Level::AREA_WIDTH_BLOCKS, Level::AREA_WIDTH_BLOCKS);
+  
   std::pair<int,int> exitCoords =
     generator.mazeGenerator.getExit(::rand() % generator.mazeGenerator.getNumberOfExits());
   log("Spawn player at exit (area coords): %d, %d", exitCoords.first, exitCoords.second);
@@ -207,58 +207,22 @@ void Play::addMoreAreas(Context &context, int area_x, int area_y)
         MazeGenerator::MazeCell cell = generator.mazeGenerator.getCellAt(i, j);
         
         if (!cell.passable) {
-          addArea(context, i, j, WorldGenerator::AREA_FULL);
+          addArea(context, i, j, MazeGenerator::PASSAGE_NO);
           continue;
         }
         
-        assert(cell.passableStraightNeighborsNumber > 0);
-        
-        if (cell.passableStraightNeighborsNumber == 4) {
-          addArea(context, i, j, WorldGenerator::PASSAGE_XCROSS);
-        } else if (cell.passableStraightNeighborsNumber == 3) {
-          if (!(cell.passableNeighbors & MazeGenerator::TOP_NEIGHBOR)) {
-            addArea(context, i, j, WorldGenerator::PASSAGE_TCROSS_BLIND_TOP);
-          } else if (!(cell.passableNeighbors & MazeGenerator::BOTTOM_NEIGHBOR)) {
-            addArea(context, i, j, WorldGenerator::PASSAGE_TCROSS_BLIND_BOTTOM);
-          } else if (!(cell.passableNeighbors & MazeGenerator::LEFT_NEIGHBOR)) {
-            addArea(context, i, j, WorldGenerator::PASSAGE_TCROSS_BLIND_LEFT);
-          } else if (!(cell.passableNeighbors & MazeGenerator::RIGHT_NEIGHBOR)) {
-            addArea(context, i, j, WorldGenerator::PASSAGE_TCROSS_BLIND_RIGHT);
-          }
-        } else if (cell.passableStraightNeighborsNumber <= 2) {
-          if (cell.passableNeighbors & MazeGenerator::LEFT_NEIGHBOR) {
-            if (cell.passableNeighbors & MazeGenerator::RIGHT_NEIGHBOR) {
-              addArea(context, i, j, WorldGenerator::PASSAGE_HORIZONTAL);
-            } else if (cell.passableNeighbors & MazeGenerator::TOP_NEIGHBOR) {
-              addArea(context, i, j, WorldGenerator::PASSAGE_LEFT_TO_TOP);
-            } else if (cell.passableNeighbors & MazeGenerator::BOTTOM_NEIGHBOR) {
-              addArea(context, i, j, WorldGenerator::PASSAGE_LEFT_TO_BOTTOM);
-            } else {
-              addArea(context, i, j, WorldGenerator::PASSAGE_HORIZONTAL); // тупик
-            }
-          } else if (cell.passableNeighbors & MazeGenerator::RIGHT_NEIGHBOR) {
-            if (cell.passableNeighbors & MazeGenerator::TOP_NEIGHBOR) {
-              addArea(context, i, j, WorldGenerator::PASSAGE_TOP_TO_RIGHT);
-            } else if (cell.passableNeighbors & MazeGenerator::BOTTOM_NEIGHBOR) {
-              addArea(context, i, j, WorldGenerator::PASSAGE_BOTTOM_TO_RIGHT);
-            } else {
-              addArea(context, i, j, WorldGenerator::PASSAGE_HORIZONTAL); // тупик
-            }
-          } else if (cell.passableNeighbors & MazeGenerator::TOP_NEIGHBOR) {
-            addArea(context, i, j, WorldGenerator::PASSAGE_VERTICAL);  // тупик или просто вертикальный проход
-          } else if (cell.passableNeighbors & MazeGenerator::BOTTOM_NEIGHBOR) {
-            addArea(context, i, j, WorldGenerator::PASSAGE_VERTICAL);  // тупик
-          }
-        }
+        MazeGenerator::CellType areaType = cell.getType();
+        assert(areaType != MazeGenerator::PASSAGE_ISOLATED_ROOM);
+        addArea(context, i, j, areaType);
       }
     }
   }
 }
 
-void Play::addArea(Context &context, int area_x, int area_y, WorldGenerator::AreaType type)
+void Play::addArea(Context &context, int area_x, int area_y, MazeGenerator::CellType type)
 {
   Area *area = new Area(Level::AREA_WIDTH_BLOCKS);
-  generator.fillArea(area, areaMap, area_x, area_y, type);
+  generator.fillArea(area, area_x, area_y, type);
   
   // initializing blocks and their game mechanics
   for (int blockX = 0; blockX < area->getWidthInBlocks(); ++blockX) {

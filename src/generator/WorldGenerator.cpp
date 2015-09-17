@@ -21,6 +21,23 @@
 #define MIN_PASSAGE_HEIGHT 4
 #define MAX_PASSAGE_HEIGHT 14
 
+struct AreaStitching
+{
+  int leftExitTopTerrainHeight;
+  int leftExitBottomTerrainHeight;
+  
+  int rightExitTopTerrainHeight;
+  int rightExitBottomTerrainHeight;
+  
+  int topExitLeftTerrainWidth;
+  int topExitRightTerrainWidth;
+  
+  int bottomExitLeftTerrainWidth;
+  int bottomExitRightTerrainWidth;
+};
+
+static std::map<std::pair<int, int>, AreaStitching> stitchingMap;
+
 static unsigned int getAreaSeed(long seed_param, int x_param, int y_param)
 {
   struct CombinedData
@@ -52,13 +69,97 @@ void WorldGenerator::setSeed(unsigned int seed_param)
   log("World generator seed is %u", seed);
 }
 
-void WorldGenerator::createMaze()
+static std::pair<int,int> generatePassageThickness(int area_size)
+{
+  int firstTerrainThickness = ::rand() % (area_size - MAX_PASSAGE_HEIGHT - 1) + 1;
+  int spaceLeft = area_size - firstTerrainThickness;
+  int secondTerrainThickness    = ::rand() % (MAX_PASSAGE_HEIGHT - MIN_PASSAGE_HEIGHT) + spaceLeft - MAX_PASSAGE_HEIGHT;
+  
+  return std::pair<int,int>(firstTerrainThickness, secondTerrainThickness);
+}
+
+void WorldGenerator::createMazeCluster(int area_width, int area_height)
 {
   ::srand(seed);
   mazeGenerator.createMaze();
+  
+  for (int i = 0; i < MazeGenerator::MAZE_WIDTH; ++i) {
+    for (int j = 0; j < MazeGenerator::MAZE_HEIGHT; ++j) {
+      MazeGenerator::MazeCell cell = mazeGenerator.getCellAt(i, j);
+      
+      if (!cell.passable) {
+        continue;
+      }
+      
+      AreaStitching neighborStitching = {0};
+      AreaStitching currentCellStitching = {0};
+      
+      if (cell.passableNeighbors & MazeGenerator::LEFT_NEIGHBOR) {
+        try {
+          neighborStitching = stitchingMap.at(std::pair<int,int>(i - 1, j));
+        } catch (std::out_of_range &e) {}
+        
+        if (neighborStitching.rightExitTopTerrainHeight) {
+          currentCellStitching.leftExitTopTerrainHeight = neighborStitching.rightExitTopTerrainHeight;
+          currentCellStitching.leftExitBottomTerrainHeight = neighborStitching.rightExitBottomTerrainHeight;
+        } else {
+          std::pair<int,int> passage = generatePassageThickness(area_height);
+          currentCellStitching.leftExitBottomTerrainHeight = passage.first;
+          currentCellStitching.leftExitTopTerrainHeight = passage.second;
+        }
+      }
+      
+      if (cell.passableNeighbors & MazeGenerator::RIGHT_NEIGHBOR) {
+        try {
+          neighborStitching = stitchingMap.at(std::pair<int,int>(i + 1, j));
+        } catch (std::out_of_range &e) {}
+        
+        if (neighborStitching.leftExitTopTerrainHeight) {
+          currentCellStitching.rightExitTopTerrainHeight = neighborStitching.leftExitTopTerrainHeight;
+          currentCellStitching.rightExitBottomTerrainHeight = neighborStitching.leftExitBottomTerrainHeight;
+        } else {
+          std::pair<int,int> passage = generatePassageThickness(area_height);
+          currentCellStitching.rightExitBottomTerrainHeight = passage.first;
+          currentCellStitching.rightExitTopTerrainHeight = passage.second;
+        }
+      }
+      
+      if (cell.passableNeighbors & MazeGenerator::TOP_NEIGHBOR) {
+        try {
+          neighborStitching = stitchingMap.at(std::pair<int,int>(i, j - 1));
+        } catch (std::out_of_range &e) {}
+        
+        if (neighborStitching.bottomExitLeftTerrainWidth) {
+          currentCellStitching.topExitLeftTerrainWidth = neighborStitching.bottomExitLeftTerrainWidth;
+          currentCellStitching.topExitRightTerrainWidth = neighborStitching.bottomExitRightTerrainWidth;
+        } else {
+          std::pair<int,int> passage = generatePassageThickness(area_width);
+          currentCellStitching.topExitLeftTerrainWidth = passage.first;
+          currentCellStitching.topExitRightTerrainWidth = passage.second;
+        }
+      }
+      
+      if (cell.passableNeighbors & MazeGenerator::BOTTOM_NEIGHBOR) {
+        try {
+          neighborStitching = stitchingMap.at(std::pair<int,int>(i, j + 1));
+        } catch (std::out_of_range &e) {}
+        
+        if (neighborStitching.topExitLeftTerrainWidth) {
+          currentCellStitching.bottomExitLeftTerrainWidth = neighborStitching.topExitLeftTerrainWidth;
+          currentCellStitching.bottomExitRightTerrainWidth = neighborStitching.topExitRightTerrainWidth;
+        } else {
+          std::pair<int,int> passage = generatePassageThickness(area_width);
+          currentCellStitching.bottomExitLeftTerrainWidth = passage.first;
+          currentCellStitching.bottomExitRightTerrainWidth = passage.second;
+        }
+      }
+      
+      stitchingMap[std::pair<int,int>(i, j)] = currentCellStitching;
+    }
+  }
 }
 
-void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, AreaType type)
+void WorldGenerator::fillArea(Area *area, int area_x, int area_y, MazeGenerator::CellType type)
 {
   unsigned int combinedSeed = getAreaSeed(seed, area_x, area_y);
   log("Combined seed for this area is (%u + %d + %d) = %u", seed, area_x, area_y, combinedSeed);
@@ -66,73 +167,44 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
   
   area->texturePackName = "cave";
 
-  Area *adjancentLeft   = NULL;
-  Area *adjancentRight  = NULL;
-  Area *adjancentTop    = NULL;
-  Area *adjancentBottom = NULL;
-
-  int leftNeighborTopHeight    = 0;
-  int leftNeighborBottomHeight = 0;
-  int rightNeighborTopHeight      = 0;
-  int rightNeighborBottomHeight   = 0;
-
-  int bottomNeighborLeftWidth   = 0;
-  int bottomNeighborRightWidth  = 0;
-  int topNeighborLeftWidth      = 0;
-  int topNeighborRightWidth     = 0;
+  AreaStitching stitching = {0};
   
   try {
-    adjancentLeft = map.at(std::pair<int,int>(area_x - 1, area_y));
-    leftNeighborTopHeight = adjancentLeft->intAttributes.at("right_exit_top_terrain_height");
-    leftNeighborBottomHeight = adjancentLeft->intAttributes.at("right_exit_bottom_terrain_height");
-  } catch (std::out_of_range &e) {}
-  
-  try {
-    adjancentRight = map.at(std::pair<int,int>(area_x + 1, area_y));
-    rightNeighborTopHeight = adjancentRight->intAttributes.at("left_exit_top_terrain_height");
-    rightNeighborBottomHeight = adjancentRight->intAttributes.at("left_exit_bottom_terrain_height");
-  } catch (std::out_of_range &e) {}
-
-  try {
-    adjancentTop = map.at(std::pair<int,int>(area_x, area_y - 1));
-    topNeighborLeftWidth = adjancentTop->intAttributes.at("bottom_exit_left_terrain_width");
-    topNeighborRightWidth = adjancentTop->intAttributes.at("bottom_exit_right_terrain_width");
-  } catch (std::out_of_range &e) {}
-  
-  try {
-    adjancentBottom = map.at(std::pair<int,int>(area_x, area_y + 1));
-    bottomNeighborLeftWidth = adjancentBottom->intAttributes.at("top_exit_left_terrain_width");
-    bottomNeighborRightWidth = adjancentBottom->intAttributes.at("top_exit_right_terrain_width");
+    stitching = stitchingMap.at(std::pair<int,int>(area_x, area_y));
   } catch (std::out_of_range &e) {}
 
   switch (type)
   {
-    case PASSAGE_HORIZONTAL:
+    case MazeGenerator::PASSAGE_HORIZONTAL:
+    case MazeGenerator::PASSAGE_HORIZONTAL_BLIND_LEFT:
+    case MazeGenerator::PASSAGE_HORIZONTAL_BLIND_RIGHT:
       StraightPassage::createStraightPassage( 
         area,
         true,
         MAX_PASSAGE_HEIGHT,
         MIN_PASSAGE_HEIGHT,
-        leftNeighborTopHeight,
-        leftNeighborBottomHeight,
-        rightNeighborTopHeight,
-        rightNeighborBottomHeight
+        stitching.leftExitTopTerrainHeight,
+        stitching.leftExitBottomTerrainHeight,
+        stitching.rightExitTopTerrainHeight,
+        stitching.rightExitBottomTerrainHeight
       );
       break;
-    case PASSAGE_VERTICAL:
+    case MazeGenerator::PASSAGE_VERTICAL:
+    case MazeGenerator::PASSAGE_VERTICAL_BLIND_TOP:
+    case MazeGenerator::PASSAGE_VERTICAL_BLIND_BOTTOM:
       StraightPassage::createStraightPassage( 
         area,
         false,
         MAX_PASSAGE_HEIGHT,
         MIN_PASSAGE_HEIGHT,
-        bottomNeighborLeftWidth,
-        bottomNeighborRightWidth,
-        topNeighborLeftWidth,
-        topNeighborRightWidth
+        stitching.bottomExitLeftTerrainWidth,
+        stitching.bottomExitRightTerrainWidth,
+        stitching.topExitLeftTerrainWidth,
+        stitching.topExitRightTerrainWidth
       );
       break;
-    case PASSAGE_LEFT_TO_BOTTOM:
-    case PASSAGE_BOTTOM_TO_LEFT:
+    case MazeGenerator::PASSAGE_LEFT_TO_BOTTOM:
+    case MazeGenerator::PASSAGE_BOTTOM_TO_LEFT:
       PassageTurn::createPassageTurn(
         area,
         false,
@@ -140,14 +212,14 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
         false,
         MAX_PASSAGE_HEIGHT,
         MIN_PASSAGE_HEIGHT,
-        leftNeighborTopHeight,
-        leftNeighborBottomHeight,
-        bottomNeighborLeftWidth,
-        bottomNeighborRightWidth
+        stitching.leftExitTopTerrainHeight,
+        stitching.leftExitBottomTerrainHeight,
+        stitching.bottomExitLeftTerrainWidth,
+        stitching.bottomExitRightTerrainWidth
       );
       break;
-    case PASSAGE_LEFT_TO_TOP:
-    case PASSAGE_TOP_TO_LEFT:
+    case MazeGenerator::PASSAGE_LEFT_TO_TOP:
+    case MazeGenerator::PASSAGE_TOP_TO_LEFT:
       PassageTurn::createPassageTurn(
         area,
         false,
@@ -155,14 +227,14 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
         true,
         MAX_PASSAGE_HEIGHT,
         MIN_PASSAGE_HEIGHT,
-        leftNeighborTopHeight,
-        leftNeighborBottomHeight,
-        topNeighborLeftWidth,
-        topNeighborRightWidth
+        stitching.leftExitTopTerrainHeight,
+        stitching.leftExitBottomTerrainHeight,
+        stitching.topExitLeftTerrainWidth,
+        stitching.topExitRightTerrainWidth
       );
       break;
-    case PASSAGE_BOTTOM_TO_RIGHT:
-    case PASSAGE_RIGHT_TO_BOTTOM:
+    case MazeGenerator::PASSAGE_BOTTOM_TO_RIGHT:
+    case MazeGenerator::PASSAGE_RIGHT_TO_BOTTOM:
       PassageTurn::createPassageTurn(
         area,
         false,
@@ -170,14 +242,14 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
         false,
         MAX_PASSAGE_HEIGHT,
         MIN_PASSAGE_HEIGHT,
-        rightNeighborTopHeight,
-        rightNeighborBottomHeight,
-        bottomNeighborRightWidth,
-        bottomNeighborLeftWidth
+        stitching.rightExitTopTerrainHeight,
+        stitching.rightExitBottomTerrainHeight,
+        stitching.bottomExitRightTerrainWidth,
+        stitching.bottomExitLeftTerrainWidth
       );
       break;
-    case PASSAGE_TOP_TO_RIGHT:
-    case PASSAGE_RIGHT_TO_TOP:
+    case MazeGenerator::PASSAGE_TOP_TO_RIGHT:
+    case MazeGenerator::PASSAGE_RIGHT_TO_TOP:
       PassageTurn::createPassageTurn(
         area,
         true,
@@ -185,13 +257,13 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
         false,
         MAX_PASSAGE_HEIGHT,
         MIN_PASSAGE_HEIGHT,
-        topNeighborLeftWidth,
-        topNeighborRightWidth,
-        rightNeighborTopHeight,
-        rightNeighborBottomHeight
+        stitching.topExitLeftTerrainWidth,
+        stitching.topExitRightTerrainWidth,
+        stitching.rightExitTopTerrainHeight,
+        stitching.rightExitBottomTerrainHeight
       );
       break;
-    case PASSAGE_TCROSS_BLIND_TOP:
+    case MazeGenerator::PASSAGE_TCROSS_BLIND_TOP:
       TCross::createPassageTurn(
         area,
         false,
@@ -199,15 +271,15 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
         false,
         MAX_PASSAGE_HEIGHT,
         MIN_PASSAGE_HEIGHT,
-        leftNeighborTopHeight,
-        leftNeighborBottomHeight,
-        rightNeighborTopHeight,
-        rightNeighborBottomHeight,
-        bottomNeighborLeftWidth,
-        bottomNeighborRightWidth
+        stitching.leftExitTopTerrainHeight,
+        stitching.leftExitBottomTerrainHeight,
+        stitching.rightExitTopTerrainHeight,
+        stitching.rightExitBottomTerrainHeight,
+        stitching.bottomExitLeftTerrainWidth,
+        stitching.bottomExitRightTerrainWidth
       );
       break;
-    case PASSAGE_TCROSS_BLIND_BOTTOM:
+    case MazeGenerator::PASSAGE_TCROSS_BLIND_BOTTOM:
       TCross::createPassageTurn(
         area,
         false,
@@ -215,15 +287,15 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
         true,
         MAX_PASSAGE_HEIGHT,
         MIN_PASSAGE_HEIGHT,
-        leftNeighborTopHeight,
-        leftNeighborBottomHeight,
-        rightNeighborBottomHeight,
-        rightNeighborTopHeight,
-        topNeighborLeftWidth,
-        topNeighborRightWidth
+        stitching.leftExitTopTerrainHeight,
+        stitching.leftExitBottomTerrainHeight,
+        stitching.rightExitBottomTerrainHeight,
+        stitching.rightExitTopTerrainHeight,
+        stitching.topExitLeftTerrainWidth,
+        stitching.topExitRightTerrainWidth
       );
       break;
-    case PASSAGE_TCROSS_BLIND_RIGHT:
+    case MazeGenerator::PASSAGE_TCROSS_BLIND_RIGHT:
       TCross::createPassageTurn(
         area,
         true,
@@ -231,15 +303,15 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
         true,
         MAX_PASSAGE_HEIGHT,
         MIN_PASSAGE_HEIGHT,
-        topNeighborLeftWidth,
-        topNeighborRightWidth,
-        bottomNeighborRightWidth,
-        bottomNeighborLeftWidth,
-        leftNeighborTopHeight,
-        leftNeighborBottomHeight
+        stitching.topExitLeftTerrainWidth,
+        stitching.topExitRightTerrainWidth,
+        stitching.bottomExitRightTerrainWidth,
+        stitching.bottomExitLeftTerrainWidth,
+        stitching.leftExitTopTerrainHeight,
+        stitching.leftExitBottomTerrainHeight
       );
       break;
-    case PASSAGE_TCROSS_BLIND_LEFT:
+    case MazeGenerator::PASSAGE_TCROSS_BLIND_LEFT:
       TCross::createPassageTurn(
         area,
         true,
@@ -247,30 +319,30 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
         false,
         MAX_PASSAGE_HEIGHT,
         MIN_PASSAGE_HEIGHT,
-        topNeighborLeftWidth,
-        topNeighborRightWidth,
-        bottomNeighborLeftWidth,
-        bottomNeighborRightWidth,
-        rightNeighborTopHeight,
-        rightNeighborBottomHeight
+        stitching.topExitLeftTerrainWidth,
+        stitching.topExitRightTerrainWidth,
+        stitching.bottomExitLeftTerrainWidth,
+        stitching.bottomExitRightTerrainWidth,
+        stitching.rightExitTopTerrainHeight,
+        stitching.rightExitBottomTerrainHeight
       );
       break;
-    case PASSAGE_XCROSS:
+    case MazeGenerator::PASSAGE_XCROSS:
       XCross::createPassageTurn(
         area,
         MAX_PASSAGE_HEIGHT,
         MIN_PASSAGE_HEIGHT,
-        leftNeighborTopHeight,
-        leftNeighborBottomHeight,
-        rightNeighborTopHeight,
-        rightNeighborBottomHeight,
-        bottomNeighborLeftWidth,
-        bottomNeighborRightWidth,
-        topNeighborLeftWidth,
-        topNeighborRightWidth
+        stitching.leftExitTopTerrainHeight,
+        stitching.leftExitBottomTerrainHeight,
+        stitching.rightExitTopTerrainHeight,
+        stitching.rightExitBottomTerrainHeight,
+        stitching.bottomExitLeftTerrainWidth,
+        stitching.bottomExitRightTerrainWidth,
+        stitching.topExitLeftTerrainWidth,
+        stitching.topExitRightTerrainWidth
       );
       break;
-    case AREA_FULL:
+    case MazeGenerator::PASSAGE_NO:
       SimpleGenerator::fillAll(area);
       break;
     default:
