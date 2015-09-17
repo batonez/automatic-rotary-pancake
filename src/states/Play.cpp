@@ -156,6 +156,14 @@ void Play::applyStartingRulesForBlock(Block &block, int block_x, int block_y)
 
 void Play::applyRules(Context &context)
 {
+  // completely deleting areas that were previously archived into deletedAreaMap
+  AreaMap::iterator i = deletedAreaMap.begin();
+  while (i != deletedAreaMap.end()) {
+    delete i->second;
+    i = deletedAreaMap.erase(i);
+  }
+  
+  // Moving player character
   player->getTransform()->position->x += cameraMan.x * runningSpeed;
   player->getTransform()->position->y += cameraMan.y * runningSpeed;
 
@@ -222,12 +230,12 @@ void Play::addMoreAreas(Context &context, int area_x, int area_y)
 
 void Play::removeFarAreas(Context &context, int player_area_x, int player_area_y)
 {
-  AreaMap::iterator i;
   log("=== player is at (%d, %d)", player_area_x, player_area_y);
   log("=== total areas %d", areaMap.size());
   log("====== CURRENT AREAS ====");
+  AreaMap::iterator i = areaMap.begin();
   
-  for (i = areaMap.begin(); i != areaMap.end(); ++i) {
+  while (i != areaMap.end()) {
     std::pair<int,int> areaCoords = i->first;
     log("(%d, %d)", areaCoords.first, areaCoords.second);
     
@@ -245,8 +253,10 @@ void Play::removeFarAreas(Context &context, int player_area_x, int player_area_y
         }
       }
      
-      areaMap.erase(i);
-      delete area;
+      i = areaMap.erase(i);
+      deletedAreaMap[areaCoords] = area;
+    } else {
+      ++i;
     }
   }
   

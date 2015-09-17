@@ -26,6 +26,7 @@ class Play: public State
     Player *player;
     WorldGenerator generator;
     AreaMap areaMap;
+    AreaMap deletedAreaMap;
     
     int
       prevPlayerBlockCoordX,
