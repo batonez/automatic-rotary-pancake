@@ -19,18 +19,25 @@ static void fillRandom(Area *area)
   }
 }
 
-static void fillHorizontalPassage(Area *area, int minPassageHeight, int maxPassageHeight)
-{  
+static void fillHorizontalSymmetricalPassage(Area *area, int minPassageHeight, int maxPassageHeight)
+{
   for (int i = 0; i < area->getWidthInBlocks(); ++i) {
-    int passageHeight = ::rand() % maxPassageHeight + minPassageHeight + 1;
-    int halfPassageHeight = passageHeight / 2;
-    
+    int passageHeight = ::rand() % (maxPassageHeight - minPassageHeight) + minPassageHeight;
+    int numberOfTerrainBlocks = area->getHeightInBlocks() - passageHeight;
+    int topTerrainHeight = numberOfTerrainBlocks / 2;
+    int bottomTerrainHeight = topTerrainHeight + numberOfTerrainBlocks % 2;
+        
     for (int j = 0; j < area->getHeightInBlocks(); ++j) {    
-      if (j < halfPassageHeight || j > area->getHeightInBlocks() - halfPassageHeight) {
+      if (j < topTerrainHeight || j >= area->getHeightInBlocks() - bottomTerrainHeight) {
           area->add(new Terrain(), i, j);
       }
     }
   }
+}
+
+static void fillHorizontalPassage(Area *area, int minPassageHeight, int maxPassageHeight)
+{
+    
 }
 
 //==============================================================================
@@ -53,5 +60,5 @@ void WorldGenerator::setSeed(long seed_param)
 void WorldGenerator::fillArea(Area *area)
 {
   area->texturePackName = "cave";
-  fillHorizontalPassage(area, 1, area->getHeightInBlocks() - 2);
+  fillHorizontalSymmetricalPassage(area, 1, area->getHeightInBlocks() - 2);
 }

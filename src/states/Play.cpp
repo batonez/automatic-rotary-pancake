@@ -6,7 +6,7 @@
 #include <strug/states/Play.h>
 #include <strug/controls/StrugController.h>
 
-#define DEBUG_GENERATOR 0
+#define DEBUG_GENERATOR 1
 
 extern Strug::ResourceManager *game_resource_manager;
 
@@ -96,6 +96,7 @@ Play::~Play()
 
 void Play::init(Context &context)
 {
+  log("AREA WIDTH BLOCKS: %d", AREA_WIDTH_BLOCKS);
   context.renderer->setBackgroundColor(0.0f, 0.0f, 0.0f);
   context.renderer->setSceneProjectionMode(GladeRenderer::ORTHO);
   //context.renderer->setDrawingOrderComparator(new Block.DrawingOrderComparator());
