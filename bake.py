@@ -19,6 +19,7 @@ os.path.join(os.environ['HATCHERY_TOOLS']  , 'OpenGL', 'include'),
 baker.compilerSources = [
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'ResourceManager.cpp'),
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'Level.cpp'),
+os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'WorldGenerator.cpp'),
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'states', 'Play.cpp'),
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'blocks', 'Terrain.cpp'),
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'blocks', 'Block.cpp'),

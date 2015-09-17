@@ -1,11 +1,15 @@
 #include <glade/render/Texture.h>
+#include <glade/render/Drawable.h>
+#include <glade/render/ShaderProgram.h>
 #include <glade/render/TextureTransform.h>
+#include <glade/render/meshes/Rectangle.h>
 #include <strug/blocks/Terrain.h>
+#include <strug/ResourceManager.h>
 
 extern Strug::ResourceManager *game_resource_manager;
 
-Terrain::Terrain(Block::Properties *properties):
-  Block(properties),
+Terrain::Terrain():
+  Block(),
   baseView(NULL)
 {
   setName("Standard terrain");

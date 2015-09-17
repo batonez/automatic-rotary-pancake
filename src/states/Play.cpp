@@ -5,12 +5,12 @@
 #include <strug/ResourceManager.h>
 #include <strug/blocks/Terrain.h>
 #include <strug/blocks/Player.h>
-
 #include <strug/states/Play.h>
 
 extern Strug::ResourceManager *game_resource_manager;
 
 const float Play::BASE_RUNNING_SPEED = 0.004f;
+const int   Play::AREA_WIDTH_BLOCKS = 10;
 
 Play::Play(const LevelInfo &level_info):
   State(),
@@ -37,23 +37,14 @@ void Play::init(Context &context)
   levelScaleX = context.renderer->getViewportWidthCoords()  / 2;
   levelScaleY = context.renderer->getViewportHeightCoords() / 2;
   
+  Area *area = new Area(AREA_WIDTH_BLOCKS);
+  generator.fillArea(area);
+  
   level = game_resource_manager->getLevel(levelInfo.path);
 
   std::shared_ptr<ShaderProgram> program =
       game_resource_manager->getShaderProgram("texcoord_frames.vertex.glsl", "textured.fragment.glsl");
-/*
-  std::shared_ptr<Texture> backgroundTexture =
-    game_resource_manager->getTexture(level->texturePackName, "background.png", "");
-    
-  if (backgroundTexture != nullptr) {
-    backgroundView = new Drawable(Rectangle::INSTANCE, program);
-    backgroundView->setTexture(backgroundTexture);
-    background.addDrawable(backgroundView);
-    backgroundView->getTransform()->setScale(levelScaleX, levelScaleY, 0);        
-  }
-  
-  context.add(&background);
-  */
+
   blockWidth = blockHeight = min(
     context.renderer->getViewportWidthCoords()  / level->getWidthInBlocks(),
     context.renderer->getViewportHeightCoords() / level->getHeightInBlocks()

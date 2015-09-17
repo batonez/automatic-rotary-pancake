@@ -135,7 +135,7 @@ namespace Strug
                   // no block created
                   break;
                 case Block::TERRAIN:
-                  object = new Mud(&blockProperties);
+                  object = new Terrain();
                   break;
                 case Block::PLAYER:
                   object = new Player();

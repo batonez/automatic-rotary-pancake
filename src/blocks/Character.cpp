@@ -66,7 +66,6 @@ Character::Character():
   locked(false),
   dead(false),
   goldCollected(0),
-  weapon(Collectable::BURNER),
   view(NULL)
 {
   if (animationTimes.empty()) {

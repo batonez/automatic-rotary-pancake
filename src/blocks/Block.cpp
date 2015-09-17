@@ -5,10 +5,7 @@
 #include <glade/math/Vector.h>
 #include <glade/debug/log.h>
 
-Block::DrawingOrder Block::drawingOrder =
-  { GOLD, SLOWING_SHOT, SPEEDUP_SHOT, MUD, ROCK,
-    EXIT, LADDER, PIPE, NPC, PLAYER, SPIKES, EFFECT
-  };
+Block::DrawingOrder Block::drawingOrder = { TERRAIN, PLAYER };
 
 
 int Block::DrawingOrderComparator::compare(GladeObject &first, GladeObject &second)

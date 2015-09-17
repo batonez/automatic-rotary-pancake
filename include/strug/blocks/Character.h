@@ -3,7 +3,6 @@
 #include <map>
 
 #include <strug/blocks/Block.h>
-#include <strug/blocks/Collectable.h>
 
 class Callable;
 
@@ -54,8 +53,6 @@ class Character: public Block
     bool wantsToGoLeft;
     bool wantsToGoDown;
     bool wantsToGoUp;
-    
-    Collectable::Weapon weapon;
     
     bool locked;
     int  goldCollected;

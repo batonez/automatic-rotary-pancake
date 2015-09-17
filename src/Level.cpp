@@ -4,14 +4,19 @@
 #include <strug/blocks/Terrain.h>
 
 Level::Level(int width_param, int height_param):
-  width(0), height(0)
+  width(0),
+  height(0),
+  adjancent_top(NULL),
+  adjancent_bottom(NULL),
+  adjancent_left(NULL),
+  adjancent_right(NULL)
 {
-  if (width_param < 0 || height_param < 0) {
-    throw StrugException("Width and height of the block level should be positive integer");
+  if (width_param < 0) {
+    throw StrugException("Width of the block level should be positive integer");
   }
   
   width  = width_param;
-  height = height_param;
+  height = height_param ? height_param : width_param;
   
   for (int y = 0; y < height; y++ ) {
     for (int x = 0; x < width; x++ ) {
