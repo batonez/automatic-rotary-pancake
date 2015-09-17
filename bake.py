@@ -50,15 +50,15 @@ baker.linkerObjects = [
 'Opengl32.lib',
 'DbgHelp.lib',
 'freetype.lib',
-os.path.join(os.environ['HATCHERY_BUILDS'], 'Gladen', '*.*'),
-os.path.join(os.environ['HATCHERY_BUILDS'], 'strug', 'obj', '*.*'),
-os.path.join(os.environ['HATCHERY_BUILDS'], 'lodepng', '*.*'),
+os.path.join(os.environ['HATCHERY_BUILDS'], 'Gladen', '*.obj'),
+os.path.join(os.environ['HATCHERY_BUILDS'], 'strug', 'obj', '*.obj'),
+os.path.join(os.environ['HATCHERY_BUILDS'], 'lodepng', '*.obj'),
 ]
 
 ######################## Run
 baker.compile()
 baker.linkExe()
 
-######################## Copy FIXME strug assets should be in 'strug' repo. Also, baker function should copy file-by-file
+######################## Copy FIXME baker copy function should copy file-by-file
 baker.copyDir(os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'assets'), os.path.join(os.environ['HATCHERY_BUILDS'], 'strug', 'assets'))
 baker.copyDir(os.path.join(os.environ['HATCHERY_SOURCES'], 'Gladen', 'res'), os.path.join(os.environ['HATCHERY_BUILDS'], 'strug', 'assets'))
