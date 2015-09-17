@@ -80,41 +80,75 @@ static void fillHorizontalSymmetricalPassageWithSteepness(Area *area, int maxPas
 
 //==============================================================================
 
+Vector2i getConstrainedSteepness(int area_width, int area_height, int from_height, int to_height, int current_area_x, int max_steepness)
+{
+  Vector2i result(max_steepness, max_steepness);
+  result.x = std::min<int>(from_height - 1, result.x);
+  
+  if (!from_height || !to_height) {
+    return result;
+  }
+  
+  int colsLeft = area_width - current_area_x;
+  int maxFinalHeight = from_height + colsLeft * max_steepness;
+  int minFinalHeight = from_height - colsLeft * max_steepness;
+  int maxRequiredFinalHeight = to_height + max_steepness;
+  int minRequiredFinalHeight = to_height - max_steepness;
+  
+  if (maxFinalHeight <=  maxRequiredFinalHeight) {
+    result.x = -result.y;
+  }
+  
+  if (minFinalHeight >= minRequiredFinalHeight) {
+    result.y = -result.x;
+  }
+  
+  return result;
+}
+
 static void calculateVerticalTerrainLine(
   /*out*/ int &bottom_terrain_height,
   /*out*/ int &top_terrain_height,
+  int to_bottom_terrain_height,
+  int to_top_terrain_height,
+  int area_width,
   int area_height,
+  int current_area_x,
   int max_passage_height,
   int min_passage_height,
-  Vector2i top_steepness,
-  Vector2i bottom_steepness
+  int max_top_steepness,
+  int max_bottom_steepness
 )
 {
+  assert(bottom_terrain_height);
+  assert(top_terrain_height);
+  
   int oldBottomHeight = bottom_terrain_height;
   int oldTopHeight    = top_terrain_height;
 
   // generating bottom terrain
-  bottom_steepness.x = std::min<int>(oldBottomHeight - 1, bottom_steepness.x);
+  Vector2i bottomSteepness = getConstrainedSteepness(area_width, area_height, oldBottomHeight, to_bottom_terrain_height, current_area_x, max_bottom_steepness);
+  
+  logn("BOTTOM STEEPNESS %d, %d; ", bottomSteepness.x, bottomSteepness.y);
   
   bottom_terrain_height = std::min<int>(
-    ::rand() % (bottom_steepness.x + bottom_steepness.y + 1) + bottom_terrain_height - bottom_steepness.x,
-    area_height - oldTopHeight - min_passage_height - (oldTopHeight ? 0 : 1)
+    ::rand() % (bottomSteepness.x + bottomSteepness.y + 1) + bottom_terrain_height - bottomSteepness.x,
+    area_height - oldTopHeight - min_passage_height
   );
 
   // generating top terrain
   int spaceLeft = area_height - bottom_terrain_height;
-  top_steepness.x = std::min<int>(oldTopHeight - 1, top_steepness.x);
+  Vector2i topSteepness = getConstrainedSteepness(area_width, area_height, oldTopHeight, to_top_terrain_height, current_area_x, max_top_steepness);
   
-  log("STEEPNESS %d %d", top_steepness.x, top_steepness.y);
+  log("TOP STEEPNESS %d, %d", topSteepness.x, topSteepness.y);
   
   top_terrain_height = std::min<int>(
-    ::rand() % (top_steepness.x + top_steepness.y + 1) + top_terrain_height - top_steepness.x,
+    ::rand() % (topSteepness.x + topSteepness.y + 1) + top_terrain_height - topSteepness.x,
     std::min<int>(
       area_height - oldBottomHeight - min_passage_height,
       spaceLeft - min_passage_height
     )
   );
-  log("FOO");
 }
 
 static void fillVerticalTerrainLine(
@@ -134,14 +168,17 @@ static void fillVerticalTerrainLine(
 static void fillHorizontalPassage(
   Area *area,
   int   max_passage_height,
+  int   min_passage_height = 1,
   int   from_top_height    = 0,
   int   from_bottom_height = 0,
-  int   min_passage_height = 1,
-  int   top_steepness      = 2,
-  int   bottom_steepness   = 2
+  int   to_top_height    = 0,
+  int   to_bottom_height = 0,
+  int   max_top_steepness      = 2,
+  int   max_bottom_steepness   = 2
 )
 {
   int areaHeight = area->getHeightInBlocks();
+  int areaWidth = area->getWidthInBlocks();
   int bottomTerrainHeight = from_bottom_height;
   int topTerrainHeight = from_top_height;
   
@@ -150,20 +187,21 @@ static void fillHorizontalPassage(
     calculateVerticalTerrainLine(
       bottomTerrainHeight,
       topTerrainHeight,
+      to_bottom_height,
+      to_top_height,
+      areaWidth,
       areaHeight,
+      0,
       max_passage_height,
       min_passage_height,
-      Vector2i(top_steepness, top_steepness),
-      Vector2i(bottom_steepness, bottom_steepness)
+      max_top_steepness,
+      max_bottom_steepness
     );
   } else {
     bottomTerrainHeight = ::rand() % (areaHeight - min_passage_height - 1) + 1;
     topTerrainHeight    = ::rand() % (areaHeight - bottomTerrainHeight - min_passage_height) + 1;
   }
 
-  assert(bottomTerrainHeight);
-  assert(topTerrainHeight);
-  
   fillVerticalTerrainLine(area, 0, topTerrainHeight, bottomTerrainHeight);
   
   area->intAttributes["left_exit_top_terrain_height"]    = topTerrainHeight;
@@ -174,15 +212,16 @@ static void fillHorizontalPassage(
     calculateVerticalTerrainLine(
       bottomTerrainHeight,
       topTerrainHeight,
+      to_bottom_height,
+      to_top_height,
+      areaWidth,
       areaHeight,
+      i,
       max_passage_height,
       min_passage_height,
-      Vector2i(top_steepness, top_steepness),
-      Vector2i(bottom_steepness, bottom_steepness)
+      max_top_steepness,
+      max_bottom_steepness
     );
-    
-    assert(bottomTerrainHeight);
-    assert(topTerrainHeight);
     
     fillVerticalTerrainLine(area, i, topTerrainHeight, bottomTerrainHeight);
   }
@@ -213,11 +252,13 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y)
   area->texturePackName = "cave";
 
   Area *adjancentLeft   = NULL;
-//  Area *adjancentRight  = NULL;
+  Area *adjancentRight  = NULL;
 //  Area *adjancentTop    = NULL;
 //  Area *adjancentBottom = NULL;
   int fromTopTerrainHeight    = 0;
   int fromBottomTerrainHeight = 0;
+  int toTopTerrainHeight         = 0;
+  int toBottomTerrainHeight   = 0;
   
   try {
     adjancentLeft = map.at(std::pair<int,int>(area_x - 1, area_y));
@@ -225,10 +266,12 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y)
     fromBottomTerrainHeight = adjancentLeft->intAttributes.at("right_exit_bottom_terrain_height");
   } catch (std::out_of_range &e) {}
   
- /* try {
+  try {
     adjancentRight = map.at(std::pair<int,int>(area_x + 1, area_y));
+    toTopTerrainHeight = adjancentRight->intAttributes.at("left_exit_top_terrain_height");
+    toBottomTerrainHeight = adjancentRight->intAttributes.at("left_exit_bottom_terrain_height");
   } catch (std::out_of_range &e) {}
-  
+/*  
   try {
     adjancentTop = map.at(std::pair<int,int>(area_x, area_y - 1));
   } catch (std::out_of_range &e) {}
@@ -237,6 +280,14 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y)
     adjancentBottom = map.at(std::pair<int,int>(area_x, area_y + 1));
   } catch (std::out_of_range &e) {}
 */ 
-  log("FROM TOP: %d, FROM BOTTOM: %d", fromTopTerrainHeight, fromBottomTerrainHeight); 
-  fillHorizontalPassage(area, area->getHeightInBlocks() - 2, fromTopTerrainHeight, fromBottomTerrainHeight);
+
+  fillHorizontalPassage(
+    area,
+    area->getHeightInBlocks() - 2,
+    1,
+    fromTopTerrainHeight,
+    fromBottomTerrainHeight,
+    toTopTerrainHeight,
+    toBottomTerrainHeight
+  );
 }
