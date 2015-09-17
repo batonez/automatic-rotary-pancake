@@ -44,12 +44,12 @@ class Play: public State
     private:
       float blockToWorldCoordX(int blockX)
       {
-        return blockX * blockWidth - screenScaleX - blockWidth / 2;
+        return blockX * blockWidth - screenScaleX + blockWidth / 2;
       }
       
       float blockToWorldCoordY(int blockY)
       {
-        return blockY * blockHeight - screenScaleY - blockHeight / 2;
+        return blockY * blockHeight - screenScaleY + blockHeight / 2;
       }
       
       int getBlockCoordX(Block &object);
