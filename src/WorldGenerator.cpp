@@ -217,6 +217,10 @@ static void fillHorizontalPassage(
   {
     throw StrugException("Steepness could not be greater than max_passage_height - min_passage_height");
   }
+  
+  if (max_passage_height - min_passage_height <= 0) {
+    throw StrugException("Max passage height should be greater than min passage height");
+  }
    
   int areaHeight = area->getHeightInBlocks();
   int areaWidth = area->getWidthInBlocks();
@@ -330,7 +334,7 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y)
 
   fillHorizontalPassage(
     area,
-    area->getHeightInBlocks() / 2 + 1,
+    area->getHeightInBlocks() / 2,
     3,
     fromTopTerrainHeight,
     fromBottomTerrainHeight,
