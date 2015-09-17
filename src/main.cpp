@@ -365,7 +365,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
   StandardDrawFrameHook hook(*gameContext);
   renderer.addDrawFrameHook(hook);
 
-  gameContext->requestStateChange(std::unique_ptr<State>(new GeneratorTest()));
+  gameContext->requestStateChange(std::unique_ptr<State>(new MazeTest()));
   
   // The parameters to ShowWindow explained:
   // hWnd: the value returned from CreateWindow
