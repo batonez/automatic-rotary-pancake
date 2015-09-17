@@ -6,6 +6,8 @@
 #include <strug/states/Play.h>
 #include <strug/controls/StrugController.h>
 
+#define DEBUG_GENERATOR 0
+
 extern Strug::ResourceManager *game_resource_manager;
 
 const float Play::BASE_RUNNING_SPEED = 0.2f;
@@ -119,6 +121,7 @@ void Play::init(Context &context)
 
 void Play::addArea(Context &context, int area_x, int area_y)
 {
+  log("GENERATING AREA (%d, %d)", area_x, area_y);
   Area *area = new Area(AREA_WIDTH_BLOCKS);
   generator.fillArea(area);
   
@@ -161,11 +164,23 @@ void Play::applyRules(Context &context)
   int playerAreaCoordX  = areaCoordFromBlockCoord(playerBlockCoordX);
   int playerAreaCoordY  = areaCoordFromBlockCoord(playerBlockCoordY);
   
-  //log("%d, %d", areaCoordFromBlockCoord(playerBlockCoordX), areaCoordFromBlockCoord(playerBlockCoordY));
-  //log("%d, %d", playerBlockCoordX, playerBlockCoordY);
-  
-  if (!areaMap.count(std::pair<int,int>(playerAreaCoordX, playerAreaCoordY))) {
-    addArea(context, playerAreaCoordX, playerAreaCoordY);
+#if DEBUG_GENERATOR
+  int areaXTo, areaYTo;
+  int areaXFrom = areaXTo = playerAreaCoordX;
+  int areaYFrom = areaYTo = playerAreaCoordY;
+#else
+  int areaXFrom = playerAreaCoordX - 1;
+  int areaXTo = playerAreaCoordX + 1;
+  int areaYFrom = playerAreaCoordY - 1;
+  int areaYTo = playerAreaCoordY + 1;
+#endif DEBUG_GENERATOR
+ 
+  for (int i = areaXFrom; i <= areaXTo; ++i) {
+    for (int j = areaYFrom; j <= areaYTo; ++j) {
+      if (!areaMap.count(std::pair<int,int>(i, j))) {
+        addArea(context, i, j);
+      }
+    }
   }
 }
 
@@ -194,4 +209,3 @@ void Play::shutdown(Context &context)
     delete controller;
   }
 }
-    
