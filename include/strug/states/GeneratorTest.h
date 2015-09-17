@@ -12,7 +12,7 @@ class Block;
 class StrugController;
 class Player;
 
-class Play: public State
+class GeneratorTest: public State
 {
   friend class CharacterController;
   
@@ -37,8 +37,8 @@ class Play: public State
     AreaMap areaMap;
 
   public:
-    Play();
-    ~Play();
+    GeneratorTest();
+    ~GeneratorTest();
     
     virtual void init(Context &context);
     virtual void shutdown(Context &context);

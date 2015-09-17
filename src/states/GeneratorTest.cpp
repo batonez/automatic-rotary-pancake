@@ -3,23 +3,23 @@
 #include <strug/ResourceManager.h>
 #include <strug/blocks/Terrain.h>
 #include <strug/blocks/Player.h>
-#include <strug/states/Play.h>
+#include <strug/states/GeneratorTest.h>
 #include <strug/controls/StrugController.h>
 
 #define DEBUG_GENERATOR 1
 
 extern Strug::ResourceManager *game_resource_manager;
 
-const float Play::BASE_RUNNING_SPEED = 0.5f;
+const float GeneratorTest::BASE_RUNNING_SPEED = 0.5f;
 
 class CharacterController: public StrugController
 {
   private:
-    Play &playState;
+    GeneratorTest &playState;
     Context &context;
     
   public:
-    CharacterController(Context &context_param, Play &play_state):
+    CharacterController(Context &context_param, GeneratorTest &play_state):
       StrugController(),
       playState(play_state),
       context(context_param)
@@ -48,7 +48,7 @@ class CharacterController: public StrugController
           break;
         case StrugController::BUTTON_FIRE:
           log("FIRE!");
-          context.requestStateChange(std::unique_ptr<State>(new Play()));
+          context.requestStateChange(std::unique_ptr<State>(new GeneratorTest()));
           handled = true;
           break;
       }
@@ -87,7 +87,7 @@ class CharacterController: public StrugController
     }
 };
 
-Play::Play():
+GeneratorTest::GeneratorTest():
   State(),
   screenScaleX(0),
   screenScaleY(0),
@@ -97,11 +97,11 @@ Play::Play():
   generator()
 {}
 
-Play::~Play()
+GeneratorTest::~GeneratorTest()
 {
 }
 
-void Play::init(Context &context)
+void GeneratorTest::init(Context &context)
 {
   log("AREA WIDTH BLOCKS: %d", Level::AREA_WIDTH_BLOCKS);
   context.renderer->setBackgroundColor(0.0f, 0.0f, 0.0f);
@@ -210,7 +210,7 @@ void Play::init(Context &context)
   context.setController(*controller);
 }
 
-void Play::addArea(Context &context, int area_x, int area_y, WorldGenerator::AreaType type)
+void GeneratorTest::addArea(Context &context, int area_x, int area_y, WorldGenerator::AreaType type)
 {
   log("GENERATING AREA (%d, %d)", area_x, area_y);
   Area *area = new Area(Level::AREA_WIDTH_BLOCKS);
@@ -233,7 +233,7 @@ void Play::addArea(Context &context, int area_x, int area_y, WorldGenerator::Are
   areaMap[std::pair<int,int>(area_x, area_y)] = area;
 }
 
-void Play::applyStartingRulesForBlock(Block &block, int block_x, int block_y)
+void GeneratorTest::applyStartingRulesForBlock(Block &block, int block_x, int block_y)
 {
   block.getTransform()->setPosition(blockToWorldCoordX(block_x), blockToWorldCoordY(block_y), 0);
   
@@ -242,7 +242,7 @@ void Play::applyStartingRulesForBlock(Block &block, int block_x, int block_y)
   }
 }
 
-void Play::applyRules(Context &context)
+void GeneratorTest::applyRules(Context &context)
 {
   player->getTransform()->position->x += cameraMan.x * runningSpeed;
   player->getTransform()->position->y += cameraMan.y * runningSpeed;
@@ -277,7 +277,7 @@ void Play::applyRules(Context &context)
   }
 }
 
-void Play::addMoreAreas(Context &context, int area_x, int area_y)
+void GeneratorTest::addMoreAreas(Context &context, int area_x, int area_y)
 {
 #if DEBUG_GENERATOR
   int areaXTo, areaYTo;
@@ -298,22 +298,22 @@ void Play::addMoreAreas(Context &context, int area_x, int area_y)
   }
 }
 
-int Play::getBlockCoordX(Block &object)
+int GeneratorTest::getBlockCoordX(Block &object)
 {
   return ::floor(((object.getTransform()->position->x + screenScaleX) / blockWidth));
 }
 
-int Play::getBlockCoordY(Block &object)
+int GeneratorTest::getBlockCoordY(Block &object)
 {
   return ::floor(((object.getTransform()->position->y + screenScaleY) / blockHeight));
 }
 
-int Play::areaCoordFromBlockCoord(int blockCoord)
+int GeneratorTest::areaCoordFromBlockCoord(int blockCoord)
 {
   return blockCoord ? ::floor((float) blockCoord / Level::AREA_WIDTH_BLOCKS) : 0;
 }
 
-void Play::shutdown(Context &context)
+void GeneratorTest::shutdown(Context &context)
 {
   // TODO free level and other memory
   
