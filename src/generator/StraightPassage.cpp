@@ -1,87 +1,21 @@
-#include <glade/debug/log.h>
-#include <glade/math/vector.h>
-#include <strug/WorldGenerator.h>
-#include <strug/Level.h>
-#include <strug/blocks/Terrain.h>
-#include <strug/exception/StrugException.h>
-
 #include <stdlib.h>
-#include <time.h>
 #include <algorithm>
 #include <assert.h>
 
-// Area generation algorigthms: ================================================
+#include <glade/debug/log.h>
+#include <glade/math/vector.h>
+#include <strug/generator/StraightPassage.h>
+#include <strug/blocks/Terrain.h>
+#include <strug/exception/StrugException.h>
 
-static void fillRandom(Area *area)
-{
-  for (int j = 0; j < area->getHeightInBlocks(); ++j) {
-    for (int i = 0; i < area->getWidthInBlocks(); ++i) {
-      if (::rand() % 2) {
-        area->add(new Terrain(), i, j);
-      }
-    }
-  }
-}
-
-static void fillHorizontalSymmetricalPassage(Area *area, int maxPassageHeight, int minPassageHeight = 1)
-{
-  for (int i = 0; i < area->getWidthInBlocks(); ++i) {
-    int passageHeight = ::rand() % (maxPassageHeight - minPassageHeight) + minPassageHeight;
-    int numberOfTerrainBlocks = area->getHeightInBlocks() - passageHeight;
-    int topTerrainHeight = numberOfTerrainBlocks / 2;
-    int bottomTerrainHeight = numberOfTerrainBlocks - topTerrainHeight;
-        
-    for (int j = 0; j < area->getHeightInBlocks(); ++j) {    
-      if (j < topTerrainHeight || j >= area->getHeightInBlocks() - bottomTerrainHeight) {
-        area->add(new Terrain(), i, j);
-      }
-    }
-  }
-}
-
-static void fillHorizontalSymmetricalPassageWithSteepness(Area *area, int maxPassageHeight, int minPassageHeight = 1, int steepness = 3)
-{
-  int previousPassageHeight = 0;
-  int passageHeight;
-  
-  for (int i = 0; i < area->getWidthInBlocks(); ++i) {
-    if (!previousPassageHeight) {
-      passageHeight = ::rand() % (maxPassageHeight - minPassageHeight) + minPassageHeight;
-    } else {
-      int range;
-      
-      if (previousPassageHeight - steepness < minPassageHeight) {
-        range = steepness + 1;
-      } else {
-        range = steepness * 2 + 1;
-      }
-      
-      passageHeight = std::min<int>(
-        ::rand() % (range)
-        + std::max<int>(
-          previousPassageHeight - steepness, minPassageHeight
-        ),
-        maxPassageHeight
-      );
-    }
-    
-    int numberOfTerrainBlocks = area->getHeightInBlocks() - passageHeight;
-    int topTerrainHeight = numberOfTerrainBlocks / 2;
-    int bottomTerrainHeight = numberOfTerrainBlocks - topTerrainHeight;
-        
-    for (int j = 0; j < area->getHeightInBlocks(); ++j) {    
-      if (j < topTerrainHeight || j >= area->getHeightInBlocks() - bottomTerrainHeight) {
-        area->add(new Terrain(), i, j);
-      }
-    }
-    
-    previousPassageHeight = passageHeight;
-  }
-}
-
-//==============================================================================
-
-Vector2i getConstrainedSteepness(int area_width, int min_height_this_col, int max_height_this_col, int from_height, int to_height, int current_stripe_number, int max_steepness)
+Vector2i StraightPassage::getConstrainedSteepness(
+  int area_width,
+  int min_height_this_col,
+  int max_height_this_col,
+  int from_height,
+  int to_height,
+  int current_stripe_number,
+  int max_steepness)
 {
   Vector2i result(max_steepness, max_steepness);
   log("S %d %d", result.x, result.y);
@@ -116,7 +50,7 @@ Vector2i getConstrainedSteepness(int area_width, int min_height_this_col, int ma
   return result;
 }
 
-static void calculateStraightPassageStripe(
+void StraightPassage::calculateStraightPassageStripe(
   /*in-out*/ int &bottom_terrain_height,
   /*in-out*/ int &top_terrain_height,
   int to_bottom_terrain_height,
@@ -127,8 +61,7 @@ static void calculateStraightPassageStripe(
   int max_passage_thickness,
   int min_passage_thickness,
   int max_top_steepness,
-  int max_bottom_steepness
-)
+  int max_bottom_steepness)
 {
   assert(bottom_terrain_height > 0);
   assert(top_terrain_height > 0);
@@ -186,13 +119,12 @@ static void calculateStraightPassageStripe(
   log("RESULT: Terrain bottom: %d, top: %d, passage: %d", bottom_terrain_height, top_terrain_height, area_height - top_terrain_height - bottom_terrain_height);
 }
 
-static void fillStraightPassageStripe(
+void StraightPassage::fillStraightPassageStripe(
   Area *area,
   int  col_index,
   int  top_terrain_height,
   int  bottom_terrain_height,
-  bool horizontal = true
-)
+  bool horizontal)
 {
   if (horizontal) {
     for (int j = 0; j < area->getHeightInBlocks(); ++j) {    
@@ -211,18 +143,17 @@ static void fillStraightPassageStripe(
   }  
 }
 
-static void createStraightPassage(
+void StraightPassage::createStraightPassage(
   Area *area,
   bool  horizontal,
   int   max_passage_thickness,
-  int   min_passage_thickness = 1,
-  int   from_top_height    = 0,
-  int   from_bottom_height = 0,
-  int   to_top_height    = 0,
-  int   to_bottom_height = 0,
-  int   max_top_steepness      = 2,
-  int   max_bottom_steepness   = 2
-)
+  int   min_passage_thickness,
+  int   from_top_height,
+  int   from_bottom_height,
+  int   to_top_height,
+  int   to_bottom_height,
+  int   max_top_steepness,
+  int   max_bottom_steepness)
 {
   if (max_top_steepness > max_passage_thickness - min_passage_thickness
     || max_bottom_steepness > max_passage_thickness - min_passage_thickness)
@@ -301,80 +232,4 @@ static void createStraightPassage(
     area->intAttributes["top_exit_left_terrain_width"]    = topTerrainHeight;
     area->intAttributes["top_exit_right_terrain_width"] = bottomTerrainHeight;
   }
-}
-
-//==============================================================================
-
-WorldGenerator::WorldGenerator(long seed_param)
-{
-  setSeed(seed_param);
-}
-
-void WorldGenerator::setSeed(long seed_param)
-{
-  if (!seed_param) {
-    seed = ::time(NULL);
-  }
-  
-  log("World generator seed is %ld", seed);
-  ::srand(seed);
-}
-
-void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y)
-{
-  area->texturePackName = "cave";
-
-  Area *adjancentLeft   = NULL;
-  Area *adjancentRight  = NULL;
-  Area *adjancentTop    = NULL;
-  Area *adjancentBottom = NULL;
-
-  int fromTopTerrainHeight    = 0;
-  int fromBottomTerrainHeight = 0;
-  int toTopTerrainHeight      = 0;
-  int toBottomTerrainHeight   = 0;
-
-  int fromLeftTerrainWidth    = 0;
-  int fromRightTerrainWidth   = 0;
-  int toLeftTerrainWidth      = 0;
-  int toRightTerrainWidth     = 0;
- 
-  try {
-    adjancentLeft = map.at(std::pair<int,int>(area_x - 1, area_y));
-    fromTopTerrainHeight = adjancentLeft->intAttributes.at("right_exit_top_terrain_height");
-    fromBottomTerrainHeight = adjancentLeft->intAttributes.at("right_exit_bottom_terrain_height");
-  } catch (std::out_of_range &e) {}
-  
-  try {
-    adjancentRight = map.at(std::pair<int,int>(area_x + 1, area_y));
-    toTopTerrainHeight = adjancentRight->intAttributes.at("left_exit_top_terrain_height");
-    toBottomTerrainHeight = adjancentRight->intAttributes.at("left_exit_bottom_terrain_height");
-  } catch (std::out_of_range &e) {}
-
-  try {
-    adjancentTop = map.at(std::pair<int,int>(area_x, area_y - 1));
-    toLeftTerrainWidth = adjancentTop->intAttributes.at("bottom_exit_left_terrain_width");
-    toRightTerrainWidth = adjancentTop->intAttributes.at("bottom_exit_right_terrain_width");
-  } catch (std::out_of_range &e) {}
-  
-  try {
-    adjancentBottom = map.at(std::pair<int,int>(area_x, area_y + 1));
-    fromLeftTerrainWidth = adjancentBottom->intAttributes.at("top_exit_left_terrain_width");
-    fromRightTerrainWidth = adjancentBottom->intAttributes.at("top_exit_right_terrain_width");
-  } catch (std::out_of_range &e) {}
-
-  createStraightPassage(
-    area,
-    false,
-    area->getHeightInBlocks() / 2,
-    3,
-   // fromTopTerrainHeight,
-   // fromBottomTerrainHeight,
-   // toTopTerrainHeight,
-   // toBottomTerrainHeight
-    fromLeftTerrainWidth,
-    fromRightTerrainWidth,
-    toLeftTerrainWidth,
-    toRightTerrainWidth
-  );
 }
