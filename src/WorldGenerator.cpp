@@ -3,6 +3,7 @@
 #include <strug/WorldGenerator.h>
 #include <strug/Level.h>
 #include <strug/blocks/Terrain.h>
+#include <strug/exception/StrugException.h>
 
 #include <stdlib.h>
 #include <time.h>
@@ -83,11 +84,14 @@ static void fillHorizontalSymmetricalPassageWithSteepness(Area *area, int maxPas
 Vector2i getConstrainedSteepness(int area_width, int min_height_this_col, int max_height_this_col, int from_height, int to_height, int current_area_x, int max_steepness)
 {
   Vector2i result(max_steepness, max_steepness);
+  log("S %d %d", result.x, result.y);
   
   // Cannot let the passage be taller than max passage height  
   result.x = std::min<int>(from_height - min_height_this_col, result.x);  
   // Exclude corner blocking
   result.y = std::min<int>(max_height_this_col - from_height, result.y);
+  
+  log("S %d %d", result.x, result.y);
   
   if (!from_height || !to_height) {
     return result;
@@ -106,6 +110,8 @@ Vector2i getConstrainedSteepness(int area_width, int min_height_this_col, int ma
   if (minFinalHeight >= minRequiredFinalHeight) {
     result.y = -result.x;
   }
+  
+  log("S %d %d", result.x, result.y);
   
   return result;
 }
@@ -127,7 +133,7 @@ static void calculateVerticalTerrainLine(
   assert(bottom_terrain_height > 0);
   assert(top_terrain_height > 0);
 
-  log("TERRAIN BOTTOM: %d, TOP: %d", bottom_terrain_height, top_terrain_height);
+  log("Old terrain bottom: %d, top: %d", bottom_terrain_height, top_terrain_height);
   
   int oldBottomHeight = bottom_terrain_height;
   int oldTopHeight    = top_terrain_height;
@@ -141,13 +147,18 @@ static void calculateVerticalTerrainLine(
   
   int minHeightThisCol = 1;
   
+  log("Bottom terrain min height: %d, Max height: %d", minHeightThisCol, maxHeightThisCol);
+  
   // generating bottom terrain
+  log("Bottom steepness:");
   Vector2i bottomSteepness = getConstrainedSteepness(area_width, minHeightThisCol, maxHeightThisCol, oldBottomHeight, to_bottom_terrain_height, current_area_x, max_bottom_steepness);
 
   bottom_terrain_height = 
     ::rand() % (bottomSteepness.x + bottomSteepness.y + 1) + oldBottomHeight - bottomSteepness.x;
   
   int spaceLeft = area_height - bottom_terrain_height;
+  
+  log("Generateed bottom terrain: %d, Space left: %d", bottom_terrain_height, spaceLeft);
   
   // Min and max passage height
   maxHeightThisCol = std::min<int>(
@@ -162,13 +173,17 @@ static void calculateVerticalTerrainLine(
   }
   
   minHeightThisCol = std::max<int>(spaceLeft - max_passage_height, 1);
+
+  log("Top terrain min height: %d, Max height: %d", minHeightThisCol, maxHeightThisCol);
   
   // generating top terrain
+  log("Top steepness:");
   Vector2i topSteepness = getConstrainedSteepness(area_width, minHeightThisCol, maxHeightThisCol, oldTopHeight, to_top_terrain_height, current_area_x, max_top_steepness);
-
-  // reimplement this as steepness constrain
+  
   top_terrain_height = 
     ::rand() % (topSteepness.x + topSteepness.y + 1) + oldTopHeight - topSteepness.x;
+    
+  log("RESULT: Terrain bottom: %d, top: %d, passage: %d", bottom_terrain_height, top_terrain_height, area_height - top_terrain_height - bottom_terrain_height);
 }
 
 static void fillVerticalTerrainLine(
@@ -197,13 +212,20 @@ static void fillHorizontalPassage(
   int   max_bottom_steepness   = 2
 )
 {
+  if (max_top_steepness > max_passage_height - min_passage_height
+    || max_bottom_steepness > max_passage_height - min_passage_height)
+  {
+    throw StrugException("Steepness could not be greater than max_passage_height - min_passage_height");
+  }
+   
   int areaHeight = area->getHeightInBlocks();
   int areaWidth = area->getWidthInBlocks();
   int bottomTerrainHeight = from_bottom_height;
   int topTerrainHeight = from_top_height;
   
   // generating first column
-  if (bottomTerrainHeight && topTerrainHeight) {  
+  if (bottomTerrainHeight && topTerrainHeight) {
+    log ("========= FIRST COL============");
     calculateVerticalTerrainLine(
       bottomTerrainHeight,
       topTerrainHeight,
@@ -218,10 +240,12 @@ static void fillHorizontalPassage(
       max_bottom_steepness
     );
   } else {
+    log("========= RANDOM FIRST COL============");
     bottomTerrainHeight = ::rand() % (areaHeight - max_passage_height - 1) + 1;
     int spaceLeft = areaHeight - bottomTerrainHeight;
-    log("SPACE LEFT: %d, MAX PASSAGE HEIGHT: %d", spaceLeft, max_passage_height);
+    log("Bottom terrain: %d, space left: %d", bottomTerrainHeight, spaceLeft);
     topTerrainHeight    = ::rand() % (max_passage_height - min_passage_height) + spaceLeft - max_passage_height;
+    log("RESULT: Bottom terrain: %d, top terrain: %d, passage: %d", bottomTerrainHeight, topTerrainHeight, areaWidth - bottomTerrainHeight - topTerrainHeight);
   }
 
   fillVerticalTerrainLine(area, 0, topTerrainHeight, bottomTerrainHeight);
@@ -230,7 +254,8 @@ static void fillHorizontalPassage(
   area->intAttributes["left_exit_bottom_terrain_height"] = bottomTerrainHeight;
   
   // generating the rest of the columns
-  for (int i = 1; i < area->getWidthInBlocks(); ++i) {  
+  for (int i = 1; i < area->getWidthInBlocks(); ++i) {
+    log ("========= COL %d ============", i);
     calculateVerticalTerrainLine(
       bottomTerrainHeight,
       topTerrainHeight,
@@ -305,8 +330,7 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y)
 
   fillHorizontalPassage(
     area,
-    //area->getHeightInBlocks() - 2,
-    5,
+    area->getHeightInBlocks() / 2 + 1,
     3,
     fromTopTerrainHeight,
     fromBottomTerrainHeight,

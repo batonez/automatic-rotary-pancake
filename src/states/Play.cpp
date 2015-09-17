@@ -44,6 +44,10 @@ class CharacterController: public StrugController
           playState.cameraMan.y =  1;
           handled = true;
           break;
+        case StrugController::BUTTON_FIRE:
+          log("FIRE!");
+          handled = true;
+          break;
       }
       
       return handled;
