@@ -13,7 +13,7 @@ extern Strug::ResourceManager *game_resource_manager;
 const float MazeTest::BASE_RUNNING_SPEED = 0.5f;
 const int   MazeTest::MAZE_WIDTH  = 16;
 const int   MazeTest::MAZE_HEIGHT = 16;
-const float MazeTest::BRAIDNESS   = 0.0002f;
+const float MazeTest::BRAIDNESS   = 0.5f;
 const int   MazeTest::MAX_EXIT_CARVE_ATTEMPTS = 40;
 
 class MazeController: public StrugController

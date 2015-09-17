@@ -18,6 +18,7 @@
 #include <strug/controls/StrugController.h>
 #include <strug/exception/StrugException.h>
 #include <strug/states/MazeTest.h>
+#include <strug/states/GeneratorTest.h>
 
 #define VIEWPORT_WIDTH 600
 #define VIEWPORT_HEIGHT 600
@@ -364,7 +365,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
   StandardDrawFrameHook hook(*gameContext);
   renderer.addDrawFrameHook(hook);
 
-  gameContext->requestStateChange(std::unique_ptr<State>(new MazeTest()));
+  gameContext->requestStateChange(std::unique_ptr<State>(new GeneratorTest()));
   
   // The parameters to ShowWindow explained:
   // hWnd: the value returned from CreateWindow

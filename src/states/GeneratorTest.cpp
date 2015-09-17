@@ -136,6 +136,9 @@ void GeneratorTest::init(Context &context)
   // Generate starting areas
   // addMoreAreas(context, playerAreaCoord, playerAreaCoord);
   
+  
+  addArea(context, 0, 0, WorldGenerator::PASSAGE_HORIZONTAL);
+  
   // Г-образные
    
 /*  
@@ -198,13 +201,13 @@ void GeneratorTest::init(Context &context)
 
   // Крестообразный
   
-  
+/*  
   addArea(context,   1,  0, WorldGenerator::PASSAGE_HORIZONTAL);
   addArea(context,  -1,  0, WorldGenerator::PASSAGE_HORIZONTAL);
   addArea(context,   0,  1, WorldGenerator::PASSAGE_VERTICAL);
   addArea(context,   0, -1, WorldGenerator::PASSAGE_VERTICAL);
   addArea(context,   0,  0, WorldGenerator::PASSAGE_XCROSS);
-  
+*/  
   // Setup controls
   controller = new CharacterController(context, *this);
   context.setController(*controller);
