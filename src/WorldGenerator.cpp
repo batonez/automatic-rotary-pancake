@@ -22,10 +22,10 @@ static void fillRandom(Area *area)
 static void fillHorizontalPassage(Area *area, int minPassageHeight, int maxPassageHeight)
 {  
   for (int i = 0; i < area->getWidthInBlocks(); ++i) {
-    for (int j = 0; j < area->getHeightInBlocks(); ++j) {  
-      int passageHeight = ::rand() % maxPassageHeight + minPassageHeight + 1;
-      int halfPassageHeight = passageHeight / 2;
-      
+    int passageHeight = ::rand() % maxPassageHeight + minPassageHeight + 1;
+    int halfPassageHeight = passageHeight / 2;
+    
+    for (int j = 0; j < area->getHeightInBlocks(); ++j) {    
       if (j < halfPassageHeight || j > area->getHeightInBlocks() - halfPassageHeight) {
           area->add(new Terrain(), i, j);
       }
