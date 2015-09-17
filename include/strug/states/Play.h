@@ -4,7 +4,7 @@
 #include <glade/GladeObject.h>
 #include <glade/State.h>
 #include <glade/math/Vector.h>
-#include <strug/LevelInfo.h>
+#include <strug/Level.h>
 #include <strug/WorldGenerator.h>
 
 class Context;
@@ -18,7 +18,6 @@ class Play: public State
   
   private:
     static const float BASE_RUNNING_SPEED;
-    static const int   AREA_WIDTH_BLOCKS;
     
     float runningSpeed;
     float blockWidth, blockHeight;
@@ -35,8 +34,6 @@ class Play: public State
       prevPlayerAreaCoordX,
       prevPlayerAreaCoordY;
     
-    // FIXME Should be hash table!!
-    typedef std::map< std::pair<int, int>, Area* > AreaMap;
     AreaMap areaMap;
 
   public:

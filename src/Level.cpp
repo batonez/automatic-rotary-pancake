@@ -3,13 +3,11 @@
 #include <strug/Level.h>
 #include <strug/blocks/Terrain.h>
 
+const int Level::AREA_WIDTH_BLOCKS = 16;
+
 Level::Level(int width_param, int height_param):
   width(0),
-  height(0),
-  adjancent_top(NULL),
-  adjancent_bottom(NULL),
-  adjancent_left(NULL),
-  adjancent_right(NULL)
+  height(0)
 {
   if (width_param < 0) {
     throw StrugException("Width of the block level should be positive integer");

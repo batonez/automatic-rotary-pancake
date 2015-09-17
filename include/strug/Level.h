@@ -25,15 +25,14 @@ class Level
     typedef std::vector<Block*>           Blocks;
     typedef std::map<Vector2i,BlockTypes> BlockTypesMap;
     typedef std::map<Vector2i,Blocks>     BlocksMap;
-
-    BlocksMap     levelData;
-    BlockTypesMap blockTypesData;
-    std::string   texturePackName;
+    typedef std::map<std::string, int>    IntGenerationInfo;
     
-    Level *adjancent_top;
-    Level *adjancent_bottom;
-    Level *adjancent_left;
-    Level *adjancent_right;
+    static const int   AREA_WIDTH_BLOCKS;
+    
+    BlocksMap         levelData;
+    BlockTypesMap     blockTypesData;
+    std::string       texturePackName;
+    IntGenerationInfo intAtrributes;
   
   private:
     int width, height;
@@ -62,3 +61,6 @@ class Level
 };
 
 typedef Level Area;
+
+// FIXME Should be hash table!!
+typedef std::map< std::pair<int, int>, Area* > AreaMap;

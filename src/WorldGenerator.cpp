@@ -20,7 +20,7 @@ static void fillRandom(Area *area)
   }
 }
 
-static void fillHorizontalSymmetricalPassage(Area *area, int minPassageHeight, int maxPassageHeight)
+static void fillHorizontalSymmetricalPassage(Area *area, int maxPassageHeight, int minPassageHeight = 1)
 {
   for (int i = 0; i < area->getWidthInBlocks(); ++i) {
     int passageHeight = ::rand() % (maxPassageHeight - minPassageHeight) + minPassageHeight;
@@ -36,7 +36,7 @@ static void fillHorizontalSymmetricalPassage(Area *area, int minPassageHeight, i
   }
 }
 
-static void fillHorizontalSymmetricalPassageWithSteepness(Area *area, int minPassageHeight, int maxPassageHeight, int steepness = 3)
+static void fillHorizontalSymmetricalPassageWithSteepness(Area *area, int maxPassageHeight, int minPassageHeight = 1, int steepness = 3)
 {
   int previousPassageHeight = 0;
   int passageHeight;
@@ -76,13 +76,22 @@ static void fillHorizontalSymmetricalPassageWithSteepness(Area *area, int minPas
   }
 }
 
-static void fillHorizontalPassage(Area *area, int minPassageHeight, int maxPassageHeight, int steepness = 2)
-{ 
+//==============================================================================
+
+static void fillVerticalLine()
+{
+  
+}
+
+static void fillHorizontalPassage(
+  Area *area, int maxPassageHeight, int from_top_height = 0,
+  int from_bottom_height = 0, int minPassageHeight = 1, int topSteepness = 2,
+  int bottomSteepness = 2)
+{
   int bottomTerrainHeight;
   int topTerrainHeight;
-  int previousBottomTerrainHeight = 0;
-  int previousTopTerrainHeight = 0;
-  int passageHeight;
+  int previousBottomTerrainHeight = from_bottom_height;
+  int previousTopTerrainHeight = from_top_height;
   
   for (int i = 0; i < area->getWidthInBlocks(); ++i) {
     if (!previousBottomTerrainHeight) {
@@ -90,14 +99,14 @@ static void fillHorizontalPassage(Area *area, int minPassageHeight, int maxPassa
     } else {
       int range;
       
-      if (previousBottomTerrainHeight - steepness < 1) {
-        range = steepness + 1;
+      if (previousBottomTerrainHeight - bottomSteepness < 1) {
+        range = bottomSteepness + 1;
       } else {
-        range = steepness * 2 + 1;
+        range = bottomSteepness * 2 + 1;
       }
     
       bottomTerrainHeight = std::min<int>(
-        ::rand() % (range) + std::max<int>(previousBottomTerrainHeight - steepness, 1),
+        ::rand() % (range) + std::max<int>(previousBottomTerrainHeight - bottomSteepness, 1),
         area->getHeightInBlocks() - previousTopTerrainHeight - minPassageHeight - (previousTopTerrainHeight ? 0 : 1)
       );
     }
@@ -109,14 +118,14 @@ static void fillHorizontalPassage(Area *area, int minPassageHeight, int maxPassa
     } else {
       int range;
       
-      if (previousTopTerrainHeight - steepness < 1) {
-        range = steepness + 1;
+      if (previousTopTerrainHeight - topSteepness < 1) {
+        range = topSteepness + 1;
       } else {
-        range = steepness * 2 + 1;
+        range = topSteepness * 2 + 1;
       }
       
       topTerrainHeight = std::min<int>(
-        ::rand() % (range) + std::max<int>(previousTopTerrainHeight - steepness, 1),
+        ::rand() % (range) + std::max<int>(previousTopTerrainHeight - topSteepness, 1),
         std::min<int>(
           area->getHeightInBlocks() - previousBottomTerrainHeight - minPassageHeight,
           spaceLeft - minPassageHeight
@@ -152,8 +161,30 @@ void WorldGenerator::setSeed(long seed_param)
   ::srand(seed);
 }
 
-void WorldGenerator::fillArea(Area *area)
+void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y)
 {
   area->texturePackName = "cave";
-  fillHorizontalPassage(area, 1, area->getHeightInBlocks() - 2);
+
+  Area *adjancentLeft   = NULL;
+  Area *adjancentRight  = NULL;
+  Area *adjancentTop    = NULL;
+  Area *adjancentBottom = NULL;
+  
+  try {
+    adjancentLeft = map.at(std::pair<int,int>(area_x - 1, area_y));
+  } catch (std::out_of_range &e) {}
+  
+  try {
+    adjancentRight = map.at(std::pair<int,int>(area_x + 1, area_y));
+  } catch (std::out_of_range &e) {}
+  
+  try {
+    adjancentTop = map.at(std::pair<int,int>(area_x, area_y - 1));
+  } catch (std::out_of_range &e) {}
+  
+  try {
+    adjancentBottom = map.at(std::pair<int,int>(area_x, area_y + 1));
+  } catch (std::out_of_range &e) {}
+  
+  fillHorizontalPassage(area, area->getHeightInBlocks() - 2);
 }

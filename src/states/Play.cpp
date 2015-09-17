@@ -11,7 +11,6 @@
 extern Strug::ResourceManager *game_resource_manager;
 
 const float Play::BASE_RUNNING_SPEED = 0.2f;
-const int   Play::AREA_WIDTH_BLOCKS = 16;
 
 class CharacterController: public StrugController
 {
@@ -96,7 +95,7 @@ Play::~Play()
 
 void Play::init(Context &context)
 {
-  log("AREA WIDTH BLOCKS: %d", AREA_WIDTH_BLOCKS);
+  log("AREA WIDTH BLOCKS: %d", Level::AREA_WIDTH_BLOCKS);
   context.renderer->setBackgroundColor(0.0f, 0.0f, 0.0f);
   context.renderer->setSceneProjectionMode(GladeRenderer::ORTHO);
   //context.renderer->setDrawingOrderComparator(new Block.DrawingOrderComparator());
@@ -105,8 +104,8 @@ void Play::init(Context &context)
   screenScaleY = context.renderer->getViewportHeightCoords() / 2;
   
   //blockWidth = blockHeight = min(
-  //  context.renderer->getViewportWidthCoords()  / AREA_WIDTH_BLOCKS,
-  //  context.renderer->getViewportHeightCoords() / AREA_WIDTH_BLOCKS
+  //  context.renderer->getViewportWidthCoords()  / Level::AREA_WIDTH_BLOCKS,
+  //  context.renderer->getViewportHeightCoords() / Level::AREA_WIDTH_BLOCKS
   //);
   
   blockWidth = blockHeight = 0.1f;
@@ -119,7 +118,7 @@ void Play::init(Context &context)
   // Create and initialize the player
   Player *playerCharacter = new Player();
   playerCharacter->initialize("common", blockWidth, blockHeight);
-  int playerBlockCoord = AREA_WIDTH_BLOCKS / 2;
+  int playerBlockCoord = Level::AREA_WIDTH_BLOCKS / 2;
   int playerAreaCoord  = areaCoordFromBlockCoord(playerBlockCoord);
   applyStartingRulesForBlock(*playerCharacter, playerBlockCoord, playerBlockCoord);
   prevPlayerBlockCoordX = prevPlayerBlockCoordY = playerBlockCoord;
@@ -137,8 +136,8 @@ void Play::init(Context &context)
 void Play::addArea(Context &context, int area_x, int area_y)
 {
   log("GENERATING AREA (%d, %d)", area_x, area_y);
-  Area *area = new Area(AREA_WIDTH_BLOCKS);
-  generator.fillArea(area);
+  Area *area = new Area(Level::AREA_WIDTH_BLOCKS);
+  generator.fillArea(area, areaMap, area_x, area_y);
   
   // initializing blocks and their game mechanics
   for (int blockX = 0; blockX < area->getWidthInBlocks(); ++blockX) {
@@ -148,7 +147,7 @@ void Play::addArea(Context &context, int area_x, int area_y)
       
       for (block = blocksInThisCell->begin(); block != blocksInThisCell->end(); ++block) {
         (*block)->initialize(area->texturePackName, blockWidth, blockHeight);
-        applyStartingRulesForBlock(**block, blockX + area_x * AREA_WIDTH_BLOCKS, blockY + area_y * AREA_WIDTH_BLOCKS);
+        applyStartingRulesForBlock(**block, blockX + area_x * Level::AREA_WIDTH_BLOCKS, blockY + area_y * Level::AREA_WIDTH_BLOCKS);
         context.add(*block);
       }
     }
@@ -234,7 +233,7 @@ int Play::getBlockCoordY(Block &object)
 
 int Play::areaCoordFromBlockCoord(int blockCoord)
 {
-  return blockCoord ? ::floor((float) blockCoord / AREA_WIDTH_BLOCKS) : 0;
+  return blockCoord ? ::floor((float) blockCoord / Level::AREA_WIDTH_BLOCKS) : 0;
 }
 
 void Play::shutdown(Context &context)
