@@ -29,6 +29,12 @@ class Play: public State
     
     Player *player;
     
+    int
+      prevPlayerBlockCoordX,
+      prevPlayerBlockCoordY,
+      prevPlayerAreaCoordX,
+      prevPlayerAreaCoordY;
+    
     // FIXME Should be hash table!!
     typedef std::map< std::pair<int, int>, Area* > AreaMap;
     AreaMap areaMap;
@@ -54,8 +60,9 @@ class Play: public State
       
       int getBlockCoordX(Block &object);
       int getBlockCoordY(Block &object);
-      int Play::areaCoordFromBlockCoord(int blockCoord);
+      int areaCoordFromBlockCoord(int blockCoord);
       
       void addArea(Context &context, int area_x, int area_y);
       void applyStartingRulesForBlock(Block &block, int block_x, int block_y);
+      void addMoreAreas(Context &context, int area_x, int area_y);
 };

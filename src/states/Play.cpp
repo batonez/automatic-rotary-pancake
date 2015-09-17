@@ -110,12 +110,21 @@ void Play::init(Context &context)
   // set actual speeds
   runningSpeed = BASE_RUNNING_SPEED * blockWidth;
   
+  // Create and initialize the player
   Player *playerCharacter = new Player();
   playerCharacter->initialize("common", blockWidth, blockHeight);
-  applyStartingRulesForBlock(*playerCharacter, AREA_WIDTH_BLOCKS / 2, AREA_WIDTH_BLOCKS / 2);
+  int playerBlockCoord = AREA_WIDTH_BLOCKS / 2;
+  int playerAreaCoord  = areaCoordFromBlockCoord(playerBlockCoord);
+  applyStartingRulesForBlock(*playerCharacter, playerBlockCoord, playerBlockCoord);
+  prevPlayerBlockCoordX = prevPlayerBlockCoordY = playerBlockCoord;
+  prevPlayerAreaCoordX = prevPlayerAreaCoordY = playerAreaCoord;
   context.add(playerCharacter);
 
- controller = new CharacterController(*this);
+  // Generate starting areas
+  addMoreAreas(context, playerAreaCoord, playerAreaCoord);
+  
+  // Setup controls
+  controller = new CharacterController(*this);
   context.setController(*controller);
 }
 
@@ -161,20 +170,45 @@ void Play::applyRules(Context &context)
   
   int playerBlockCoordX = getBlockCoordX(*player);
   int playerBlockCoordY = getBlockCoordY(*player);
-  int playerAreaCoordX  = areaCoordFromBlockCoord(playerBlockCoordX);
-  int playerAreaCoordY  = areaCoordFromBlockCoord(playerBlockCoordY);
   
+  bool playerMovedToAnotherCell =
+    playerBlockCoordX != prevPlayerBlockCoordX
+    || playerBlockCoordY != prevPlayerBlockCoordY;
+  
+  if (playerMovedToAnotherCell) {
+    log("CELL CHANGE");
+    int playerAreaCoordX  = areaCoordFromBlockCoord(playerBlockCoordX);
+    int playerAreaCoordY  = areaCoordFromBlockCoord(playerBlockCoordY);
+    
+    bool playerMovedToAnotherArea =
+      playerAreaCoordX != prevPlayerAreaCoordX
+      || playerAreaCoordY != prevPlayerAreaCoordY;
+    
+    if (playerMovedToAnotherArea) {
+      log("AREA CHANGE");
+      addMoreAreas(context, playerAreaCoordX, playerAreaCoordY);
+      
+      prevPlayerAreaCoordX = playerAreaCoordX;
+      prevPlayerAreaCoordY = playerAreaCoordY;
+    }
+    
+    prevPlayerBlockCoordX = playerBlockCoordX;
+    prevPlayerBlockCoordY = playerBlockCoordY;
+  }
+}
+
+void Play::addMoreAreas(Context &context, int area_x, int area_y)
+{
 #if DEBUG_GENERATOR
   int areaXTo, areaYTo;
-  int areaXFrom = areaXTo = playerAreaCoordX;
-  int areaYFrom = areaYTo = playerAreaCoordY;
+  int areaXFrom = areaXTo = area_x;
+  int areaYFrom = areaYTo = area_y;
 #else
-  int areaXFrom = playerAreaCoordX - 1;
-  int areaXTo = playerAreaCoordX + 1;
-  int areaYFrom = playerAreaCoordY - 1;
-  int areaYTo = playerAreaCoordY + 1;
+  int areaXFrom = area_x - 1;
+  int areaXTo   = area_x + 1;
+  int areaYFrom = area_y - 1;
+  int areaYTo   = area_y + 1;
 #endif DEBUG_GENERATOR
- 
   for (int i = areaXFrom; i <= areaXTo; ++i) {
     for (int j = areaYFrom; j <= areaYTo; ++j) {
       if (!areaMap.count(std::pair<int,int>(i, j))) {
