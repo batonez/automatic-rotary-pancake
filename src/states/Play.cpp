@@ -130,7 +130,16 @@ void Play::addArea(Context &context, int area_x, int area_y)
       
       for (block = blocksInThisCell->begin(); block != blocksInThisCell->end(); ++block) {
         (*block)->initialize(area->texturePackName, blockWidth, blockHeight);
-        applyStartingRulesForBlock(**block, (i+1) * area_x, (j+1) * area_y);
+        
+        int areaXOffsetCorrection = area_x > 0 ? -1 : 0;
+        int areaYOffsetCorrection = area_y > 0 ? -1 : 0;
+        
+        applyStartingRulesForBlock(
+          **block,
+          i + 1 + (area_x + areaXOffsetCorrection) * AREA_WIDTH_BLOCKS,
+          j + 1 + (area_y + areaYOffsetCorrection) * AREA_WIDTH_BLOCKS
+        );
+        
         context.add(*block);
       }
     }
@@ -158,12 +167,11 @@ void Play::applyRules(Context &context)
   
   int playerBlockCoordX = getBlockCoordX(*player);
   int playerBlockCoordY = getBlockCoordY(*player);
+  int playerAreaCoordX  = areaCoordFromBlockCoord(playerBlockCoordX);
+  int playerAreaCoordY  = areaCoordFromBlockCoord(playerBlockCoordY);
   
-  log("%d, %d", areaCoordFromBlockCoord(playerBlockCoordX), areaCoordFromBlockCoord(playerBlockCoordY));
-  //log("%d, %d", playerBlockCoordX, playerBlockCoordY);
-  
-  if (!areaMap.count(std::pair<int,int>(1, 1))) {
-    addArea(context, 1, 1);
+  if (!areaMap.count(std::pair<int,int>(playerAreaCoordX, playerAreaCoordY))) {
+    addArea(context, playerAreaCoordX, playerAreaCoordY);
   }
 }
 
