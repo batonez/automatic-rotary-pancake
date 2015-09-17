@@ -21,18 +21,9 @@ os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'ResourceManager.cp
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'Level.cpp'),
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'states', 'Play.cpp'),
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'blocks', 'Terrain.cpp'),
-os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'blocks', 'Mud.cpp'),
-os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'blocks', 'Rock.cpp'),
-os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'blocks', 'Collectable.cpp'),
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'blocks', 'Block.cpp'),
-os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'blocks', 'Exit.cpp'),
-os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'blocks', 'Gold.cpp'),
-os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'blocks', 'SlowingShot.cpp'),
-os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'blocks', 'SpeedupShot.cpp'),
-os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'blocks', 'Effect.cpp'),
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'blocks', 'Character.cpp'),
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'blocks', 'Player.cpp'),
-os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'blocks', 'Npc.cpp'),
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'main.cpp'),
 ]
 

@@ -186,8 +186,8 @@ int WINAPI WinMain(HINSTANCE hInstance,
 { 
   ::install_crash_handler();
   
-  static TCHAR szWindowClass[] = _T("Escape2112");
-  static TCHAR szTitle[] = _T("Escape 2112");  
+  static TCHAR szWindowClass[] = _T("Strug");
+  static TCHAR szTitle[] = _T("Strug prototype");  
   
   WNDCLASSEX wcex;
   ZeroMemory(&wcex, sizeof(WNDCLASSEX));

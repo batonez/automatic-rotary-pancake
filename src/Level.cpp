@@ -1,7 +1,7 @@
 #include <glade/math/Vector.h>
 #include <strug/exception/StrugException.h>
 #include <strug/Level.h>
-#include <strug/blocks/Rock.h>
+#include <strug/blocks/Terrain.h>
 
 Level::Level(int width_param, int height_param):
   width(0), height(0)
@@ -22,9 +22,9 @@ Level::Level(int width_param, int height_param):
   }
   
   if (outOfBoundsCell.empty()) {
-    outOfBoundsCell.push_back(new Rock());
+    outOfBoundsCell.push_back(new Terrain());
     outOfBoundsBlockTypes.clear();
-    outOfBoundsBlockTypes.push_back(Block::ROCK);
+    outOfBoundsBlockTypes.push_back(Block::TERRAIN);
   }
 }
 
@@ -80,7 +80,7 @@ Terrain* Level::getTerrainAt(int x, int y)
     Level::Blocks::iterator block;
     
     for (block = blocks->begin(); block != blocks->end(); ++block) {
-      if ((*block)->getType() == Block::MUD || (*block)->getType() == Block::ROCK) {
+      if ((*block)->getType() == Block::TERRAIN) {
         return (Terrain*) (*block);
       }
     }

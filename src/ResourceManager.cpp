@@ -9,18 +9,8 @@
 #include <strug/LevelInfo.h>
 #include <strug/Level.h>
 #include <strug/blocks/Block.h>
-#include <strug/blocks/Mud.h>
-#include <strug/blocks/Rock.h>
-#include <strug/blocks/Ladder.h>
-#include <strug/blocks/Pipe.h>
-#include <strug/blocks/Spikes.h>
-#include <strug/blocks/Gold.h>
-#include <strug/blocks/Exit.h>
-#include <strug/blocks/SlowingShot.h>
-#include <strug/blocks/SpeedupShot.h>
-#include <strug/blocks/Effect.h>
+#include <strug/blocks/Terrain.h>
 #include <strug/blocks/Player.h>
-#include <strug/blocks/Npc.h>
 #include <strug/ResourceManager.h>
 
 namespace Strug
@@ -144,38 +134,11 @@ namespace Strug
                 case 0:
                   // no block created
                   break;
-                case Block::MUD:
+                case Block::TERRAIN:
                   object = new Mud(&blockProperties);
-                  break;
-                case Block::LADDER:
-                  object = new Ladder();
-                  break;
-                case Block::NPC:
-                  object = new Npc();
                   break;
                 case Block::PLAYER:
                   object = new Player();
-                  break;
-                case Block::GOLD:
-                  object = new Gold();
-                  break;
-                case Block::PIPE:
-                  object = new Pipe();
-                  break;
-                case Block::ROCK:
-                  object = new Rock(&blockProperties);
-                  break;
-                case Block::SPIKES:
-                  object = new Spikes();
-                  break;
-                case Block::EXIT:
-                  object = new Exit();
-                  break;
-                case Block::SLOWING_SHOT:
-                  object = new SlowingShot();
-                  break;
-                case Block::SPEEDUP_SHOT:
-                  object = new SpeedupShot();
                   break;
                 default:
                   log("Block: warning: could not create block of unknown type");

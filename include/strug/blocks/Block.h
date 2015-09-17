@@ -11,18 +11,8 @@ class Block : public GladeObject
 
   public:
     enum Type {
-      MUD           = 1,
-      LADDER        = 3,
-      PIPE          = 4,
-      NPC           = 5,
-      PLAYER        = 6,
-      GOLD          = 7,
-      ROCK          = 8,
-      SPIKES        = 10,
-      EXIT          = 11,
-      EFFECT        = 15,
-      SLOWING_SHOT  = 16,
-      SPEEDUP_SHOT  = 17
+      TERRAIN = 1,
+      PLAYER  = 6,
     };
     
     typedef std::vector<Type> DrawingOrder;
