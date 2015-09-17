@@ -100,7 +100,7 @@ void StraightPassage::calculateStraightPassageStripe(
     spaceLeft - min_passage_thickness
   );
   
-   // corner blocking with the left neighbor col
+   // corner blocking with the right neighbor col
   if (area_width - current_stripe_number == 1 && to_top_terrain_height) {
     maxHeightThisCol = std::min<int>(area_height - to_bottom_terrain_height - min_passage_thickness, maxHeightThisCol);
   }

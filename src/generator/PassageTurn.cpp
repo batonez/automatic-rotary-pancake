@@ -188,6 +188,15 @@ void PassageTurn::createStraightPassage(
   int bottomTerrainHeight = from_bottom_height;
   int topTerrainHeight = from_top_height;
   
+  if (!to_left_width) {
+    to_left_width = rand() % (areaWidth - max_passage_thickness - 1) + 1;
+  }
+  
+  if (!to_right_width) {
+    int spaceLeft = areaWidth - to_left_width;
+    to_right_width = rand() % (max_passage_thickness - min_passage_thickness) + spaceLeft - max_passage_thickness;
+  }
+  
   // generating first column
   if (bottomTerrainHeight && topTerrainHeight) {
     log ("========= FIRST COL============");
@@ -244,10 +253,10 @@ void PassageTurn::createStraightPassage(
   }
   
   if (horizontal) {
-    area->intAttributes["right_exit_top_terrain_height"]    = topTerrainHeight;
-    area->intAttributes["right_exit_bottom_terrain_height"] = bottomTerrainHeight;
+    area->intAttributes["bottom_exit_right_terrain_width"] = to_right_width;
+    area->intAttributes["bottom_exit_left_terrain_width"]  = to_left_width;
   } else {
-    area->intAttributes["top_exit_left_terrain_width"]    = topTerrainHeight;
+    area->intAttributes["top_exit_left_terrain_width"]  = topTerrainHeight;
     area->intAttributes["top_exit_right_terrain_width"] = bottomTerrainHeight;
   }
 }

@@ -130,18 +130,23 @@ void Play::init(Context &context)
   context.add(playerCharacter);
 
   // Generate starting areas
-  addMoreAreas(context, playerAreaCoord, playerAreaCoord);
+//  addMoreAreas(context, playerAreaCoord, playerAreaCoord);
+  
+  addArea(context, 1, 0, WorldGenerator::PASSAGE_LEFT_TO_BOTTOM);
+  addArea(context, 0, 0, WorldGenerator::PASSAGE_HORIZONTAL);
+  addArea(context, 1, 1, WorldGenerator::PASSAGE_VERTICAL);
+
   
   // Setup controls
   controller = new CharacterController(*this);
   context.setController(*controller);
 }
 
-void Play::addArea(Context &context, int area_x, int area_y)
+void Play::addArea(Context &context, int area_x, int area_y, WorldGenerator::AreaType type)
 {
   log("GENERATING AREA (%d, %d)", area_x, area_y);
   Area *area = new Area(Level::AREA_WIDTH_BLOCKS);
-  generator.fillArea(area, areaMap, area_x, area_y);
+  generator.fillArea(area, areaMap, area_x, area_y, type);
   
   // initializing blocks and their game mechanics
   for (int blockX = 0; blockX < area->getWidthInBlocks(); ++blockX) {
@@ -176,7 +181,7 @@ void Play::applyRules(Context &context)
 
   context.renderer->camera.position->x = player->getTransform()->position->x;
   context.renderer->camera.position->y = player->getTransform()->position->y;
-  
+/*  
   int playerBlockCoordX = getBlockCoordX(*player);
   int playerBlockCoordY = getBlockCoordY(*player);
   
@@ -201,7 +206,7 @@ void Play::applyRules(Context &context)
     
     prevPlayerBlockCoordX = playerBlockCoordX;
     prevPlayerBlockCoordY = playerBlockCoordY;
-  }
+  } */
 }
 
 void Play::addMoreAreas(Context &context, int area_x, int area_y)
@@ -219,7 +224,7 @@ void Play::addMoreAreas(Context &context, int area_x, int area_y)
   for (int i = areaXFrom; i <= areaXTo; ++i) {
     for (int j = areaYFrom; j <= areaYTo; ++j) {
       if (!areaMap.count(std::pair<int,int>(i, j))) {
-        addArea(context, i, j);
+        addArea(context, i, j, WorldGenerator::PASSAGE_HORIZONTAL);
       }
     }
   }

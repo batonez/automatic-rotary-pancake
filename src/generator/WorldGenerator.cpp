@@ -27,7 +27,7 @@ void WorldGenerator::setSeed(long seed_param)
   ::srand(seed);
 }
 
-void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y)
+void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, AreaType type)
 {
   area->texturePackName = "cave";
 
@@ -47,15 +47,19 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y)
   int toRightTerrainWidth     = 0;
  
   try {
+    log("A");
     adjancentLeft = map.at(std::pair<int,int>(area_x - 1, area_y));
     fromTopTerrainHeight = adjancentLeft->intAttributes.at("right_exit_top_terrain_height");
     fromBottomTerrainHeight = adjancentLeft->intAttributes.at("right_exit_bottom_terrain_height");
+    log("AA");
   } catch (std::out_of_range &e) {}
   
   try {
+    log("B");
     adjancentRight = map.at(std::pair<int,int>(area_x + 1, area_y));
     toTopTerrainHeight = adjancentRight->intAttributes.at("left_exit_top_terrain_height");
     toBottomTerrainHeight = adjancentRight->intAttributes.at("left_exit_bottom_terrain_height");
+    log("BB");
   } catch (std::out_of_range &e) {}
 
   try {
@@ -70,19 +74,51 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y)
     fromRightTerrainWidth = adjancentBottom->intAttributes.at("top_exit_right_terrain_width");
   } catch (std::out_of_range &e) {}
 
-  PassageTurn::createStraightPassage( 
-    area,
-    true,
-    area->getHeightInBlocks() / 2,
-    3,
-    fromTopTerrainHeight,
-    fromBottomTerrainHeight,
-    8,
-    2
-   
-   // fromLeftTerrainWidth,
-   // fromRightTerrainWidth,
-   // toLeftTerrainWidth,
-   // toRightTerr ainWidth
-  );
+  switch (type)
+  {
+    case PASSAGE_HORIZONTAL:
+      StraightPassage::createStraightPassage( 
+        area,
+        true,
+        area->getHeightInBlocks() / 2,
+        3,
+        fromTopTerrainHeight,
+        fromBottomTerrainHeight,
+        toTopTerrainHeight,
+        toBottomTerrainHeight
+      );
+      break;
+    case PASSAGE_VERTICAL:
+      StraightPassage::createStraightPassage( 
+        area,
+        false,
+        area->getHeightInBlocks() / 2,
+        3,
+        fromLeftTerrainWidth,
+        fromRightTerrainWidth,
+        toLeftTerrainWidth,
+        toRightTerrainWidth
+      );
+      break;
+    case PASSAGE_LEFT_TO_BOTTOM:
+      PassageTurn::createStraightPassage(
+        area,
+        true,
+        area->getHeightInBlocks() / 2,
+        3,
+        fromTopTerrainHeight,
+        fromBottomTerrainHeight,
+        fromLeftTerrainWidth,
+        fromRightTerrainWidth
+      );
+      break;
+    case PASSAGE_LEFT_TO_TOP:
+      break;
+    case PASSAGE_BOTTOM_TO_RIGHT:
+      break;
+    case PASSAGE_TOP_TO_RIGHT:
+      break;
+    default:
+      throw StrugException("Unknown passage type");
+  }
 }
