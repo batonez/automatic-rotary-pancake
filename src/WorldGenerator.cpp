@@ -80,10 +80,15 @@ static void fillHorizontalSymmetricalPassageWithSteepness(Area *area, int maxPas
 
 //==============================================================================
 
-Vector2i getConstrainedSteepness(int area_width, int area_height, int from_height, int to_height, int current_area_x, int max_steepness)
+Vector2i getConstrainedSteepness(int area_width, int area_height, int max_col_height, int from_height, int to_height, int current_area_x, int max_steepness)
 {
   Vector2i result(max_steepness, max_steepness);
+  
+  // Cannot be less than area bounds
   result.x = std::min<int>(from_height - 1, result.x);
+  
+  // Exclude corner blocking
+  result.y = std::min<int>(max_col_height - from_height, result.y);
   
   if (!from_height || !to_height) {
     return result;
@@ -122,33 +127,45 @@ static void calculateVerticalTerrainLine(
 {
   assert(bottom_terrain_height);
   assert(top_terrain_height);
-  
+
   int oldBottomHeight = bottom_terrain_height;
   int oldTopHeight    = top_terrain_height;
+  
+  // to exclude corner blocking
+  int maxColHeight = area_height - oldTopHeight - min_passage_height;
+  
+  if (area_width - current_area_x == 1 && to_bottom_terrain_height) {
+    maxColHeight = std::min<int>(area_height - to_top_terrain_height - min_passage_height, maxColHeight);
+  }
 
   // generating bottom terrain
-  Vector2i bottomSteepness = getConstrainedSteepness(area_width, area_height, oldBottomHeight, to_bottom_terrain_height, current_area_x, max_bottom_steepness);
-  
-  logn("BOTTOM STEEPNESS %d, %d; ", bottomSteepness.x, bottomSteepness.y);
-  
-  bottom_terrain_height = std::min<int>(
-    ::rand() % (bottomSteepness.x + bottomSteepness.y + 1) + bottom_terrain_height - bottomSteepness.x,
-    area_height - oldTopHeight - min_passage_height
-  );
+  Vector2i bottomSteepness = getConstrainedSteepness(area_width, area_height, maxColHeight, oldBottomHeight, to_bottom_terrain_height, current_area_x, max_bottom_steepness);
 
-  // generating top terrain
+  logn("BOTTOM STEEPNESS %d, %d; ", bottomSteepness.x, bottomSteepness.y);
+
+  bottom_terrain_height = 
+    ::rand() % (bottomSteepness.x + bottomSteepness.y + 1) + oldBottomHeight - bottomSteepness.x;
+  
   int spaceLeft = area_height - bottom_terrain_height;
-  Vector2i topSteepness = getConstrainedSteepness(area_width, area_height, oldTopHeight, to_top_terrain_height, current_area_x, max_top_steepness);
   
-  log("TOP STEEPNESS %d, %d", topSteepness.x, topSteepness.y);
-  
-  top_terrain_height = std::min<int>(
-    ::rand() % (topSteepness.x + topSteepness.y + 1) + top_terrain_height - topSteepness.x,
-    std::min<int>(
-      area_height - oldBottomHeight - min_passage_height,
-      spaceLeft - min_passage_height
-    )
+  // to exclude corner blocking 
+  maxColHeight = std::min<int>(
+    area_height - oldBottomHeight - min_passage_height,
+    spaceLeft - min_passage_height
   );
+  
+  if (area_width - current_area_x == 1 && to_top_terrain_height) {
+    maxColHeight = std::min<int>(area_height - to_bottom_terrain_height - min_passage_height, maxColHeight);
+  }
+  
+  // generating top terrain
+  Vector2i topSteepness = getConstrainedSteepness(area_width, area_height, maxColHeight, oldTopHeight, to_top_terrain_height, current_area_x, max_top_steepness);
+
+  log("TOP STEEPNESS %d, %d", topSteepness.x, topSteepness.y);
+
+  // reimplement this as steepness constrain
+  top_terrain_height = 
+    ::rand() % (topSteepness.x + topSteepness.y + 1) + oldTopHeight - topSteepness.x;
 }
 
 static void fillVerticalTerrainLine(
@@ -284,7 +301,7 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y)
   fillHorizontalPassage(
     area,
     area->getHeightInBlocks() - 2,
-    1,
+    3,
     fromTopTerrainHeight,
     fromBottomTerrainHeight,
     toTopTerrainHeight,
