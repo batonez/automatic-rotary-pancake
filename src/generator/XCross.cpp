@@ -29,25 +29,25 @@ void XCross::calculatePassageTurnStripe(
   assert(bottom_terrain_height >= 0);
   assert(top_terrain_height >= 0);
 
-  log("Old terrain bottom: %d, top: %d", bottom_terrain_height, top_terrain_height);
+  GENERATOR_LOG("Old terrain bottom: %d, top: %d", bottom_terrain_height, top_terrain_height);
   
   int oldBottomHeight = bottom_terrain_height;
   int oldTopHeight    = top_terrain_height;
   
   if (current_stripe_number >= to_left_width_bottommost && current_stripe_number < area_width - to_right_width_bottommost) {
     bottom_terrain_height = 0;
-    log("Bottom terrain height is set to zero (after turn)");
+    GENERATOR_LOG("Bottom terrain height is set to zero (after turn)");
   } else {
     // Min and max passage height
     int maxHeightThisCol = area_height - oldTopHeight - min_passage_thickness;
     int minHeightThisCol = 1;
     
     // generating bottom terrain
-    log("Bottom steepness:");
+    GENERATOR_LOG("Bottom steepness:");
     Vector2i bottomSteepness;
 
     if (current_stripe_number < area_width - to_right_width_bottommost) {
-      log("Bottom terrain min height: %d, Max height: %d", minHeightThisCol, maxHeightThisCol);
+      GENERATOR_LOG("Bottom terrain min height: %d, Max height: %d", minHeightThisCol, maxHeightThisCol);
       bottomSteepness = get_constrained_steepness(to_left_width_bottommost, minHeightThisCol, maxHeightThisCol, oldBottomHeight, 1, current_stripe_number, max_bottom_steepness);
     } else {
       // corner blocking with the right neighbor col
@@ -55,7 +55,7 @@ void XCross::calculatePassageTurnStripe(
         maxHeightThisCol = std::min<int>(area_height - to_top_terrain_height - min_passage_thickness, maxHeightThisCol);
       }
     
-      log("Bottom terrain min height: %d, Max height: %d", minHeightThisCol, maxHeightThisCol);
+      GENERATOR_LOG("Bottom terrain min height: %d, Max height: %d", minHeightThisCol, maxHeightThisCol);
     
       bottomSteepness = get_constrained_steepness(area_width, minHeightThisCol, maxHeightThisCol, oldBottomHeight, to_bottom_terrain_height, current_stripe_number, max_bottom_steepness);
     }
@@ -65,11 +65,11 @@ void XCross::calculatePassageTurnStripe(
   }
   
   int spaceLeft = area_height - bottom_terrain_height;
-  log("Generateed bottom terrain: %d, Space left: %d", bottom_terrain_height, spaceLeft);
+  GENERATOR_LOG("Generateed bottom terrain: %d, Space left: %d", bottom_terrain_height, spaceLeft);
   
   if (current_stripe_number >= to_left_width_topmost && current_stripe_number < area_width - to_right_width_topmost) {
     top_terrain_height = 0;
-    log("Top terrain height is set to zero (after turn)");
+    GENERATOR_LOG("Top terrain height is set to zero (after turn)");
   } else {
     // Min and max passage height
     int maxHeightThisCol;
@@ -83,11 +83,11 @@ void XCross::calculatePassageTurnStripe(
     int minHeightThisCol = 1;
     
     // generating top terrain
-    log("Top steepness:");
+    GENERATOR_LOG("Top steepness:");
     Vector2i topSteepness;
     
     if (current_stripe_number < area_width - to_right_width_topmost) {
-      log("Top terrain min height: %d, Max height: %d", minHeightThisCol, maxHeightThisCol);
+      GENERATOR_LOG("Top terrain min height: %d, Max height: %d", minHeightThisCol, maxHeightThisCol);
       topSteepness = get_constrained_steepness(to_left_width_topmost, minHeightThisCol, maxHeightThisCol, oldTopHeight, 1, current_stripe_number, max_top_steepness);
     } else {
       // corner blocking with the right neighbor col
@@ -95,7 +95,7 @@ void XCross::calculatePassageTurnStripe(
         maxHeightThisCol = std::min<int>(area_height - to_bottom_terrain_height - min_passage_thickness, maxHeightThisCol);
       }
       
-      log("Top terrain min height: %d, Max height: %d", minHeightThisCol, maxHeightThisCol);
+      GENERATOR_LOG("Top terrain min height: %d, Max height: %d", minHeightThisCol, maxHeightThisCol);
       
       topSteepness = get_constrained_steepness(area_width, minHeightThisCol, maxHeightThisCol, oldTopHeight, to_top_terrain_height, current_stripe_number, max_top_steepness);
     }
@@ -104,7 +104,7 @@ void XCross::calculatePassageTurnStripe(
       ::rand() % (topSteepness.x + topSteepness.y + 1) + oldTopHeight - topSteepness.x;
   }
   
-  log("RESULT: Terrain bottom: %d, top: %d, passage: %d", bottom_terrain_height, top_terrain_height, area_height - top_terrain_height - bottom_terrain_height);
+  GENERATOR_LOG("RESULT: Terrain bottom: %d, top: %d, passage: %d", bottom_terrain_height, top_terrain_height, area_height - top_terrain_height - bottom_terrain_height);
 }
 
 void XCross::createPassageTurn(
@@ -158,18 +158,18 @@ void XCross::createPassageTurn(
 
   if (!to_bottom_height) {
     to_bottom_height = ::rand() % (areaHeight - max_passage_thickness - 1) + 1;
-    log("Random \"to bottom\" height: %d", to_bottom_height);
+    GENERATOR_LOG("Random \"to bottom\" height: %d", to_bottom_height);
   }
   
   if (!to_top_height) {
     int spaceLeft = areaHeight - to_bottom_height;
     to_top_height = ::rand() % (max_passage_thickness - min_passage_thickness) + spaceLeft - max_passage_thickness;
-    log("Random \"to top\" height: %d", to_top_height);
+    GENERATOR_LOG("Random \"to top\" height: %d", to_top_height);
   }
   
   // generating first column
   if (bottomTerrainHeight && topTerrainHeight) {
-    log ("========= FIRST COL============");
+    GENERATOR_LOG ("========= FIRST COL============");
     calculatePassageTurnStripe(
       bottomTerrainHeight,
       topTerrainHeight,
@@ -188,12 +188,12 @@ void XCross::createPassageTurn(
       max_bottom_steepness
     );
   } else {
-    log("========= RANDOM FIRST COL============");
+    GENERATOR_LOG("========= RANDOM FIRST COL============");
     bottomTerrainHeight = ::rand() % (areaHeight - max_passage_thickness - 1) + 1;
     int spaceLeft = areaHeight - bottomTerrainHeight;
-    log("Bottom terrain: %d, space left: %d", bottomTerrainHeight, spaceLeft);
+    GENERATOR_LOG("Bottom terrain: %d, space left: %d", bottomTerrainHeight, spaceLeft);
     topTerrainHeight    = ::rand() % (max_passage_thickness - min_passage_thickness) + spaceLeft - max_passage_thickness;
-    log("RESULT: Bottom terrain: %d, top terrain: %d, passage: %d", bottomTerrainHeight, topTerrainHeight, areaWidth - bottomTerrainHeight - topTerrainHeight);
+    GENERATOR_LOG("RESULT: Bottom terrain: %d, top terrain: %d, passage: %d", bottomTerrainHeight, topTerrainHeight, areaWidth - bottomTerrainHeight - topTerrainHeight);
   }
 
   fill_stripe(area, 0, topTerrainHeight, bottomTerrainHeight);
@@ -203,7 +203,7 @@ void XCross::createPassageTurn(
   
   // generating the rest of the columns
   for (int i = 1; i < areaWidth; ++i) {
-    log ("========= COL %d ============", i);
+    GENERATOR_LOG ("========= COL %d ============", i);
     calculatePassageTurnStripe(
       bottomTerrainHeight,
       topTerrainHeight,

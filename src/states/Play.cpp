@@ -8,8 +8,6 @@
 #include <strug/states/Play.h>
 #include <strug/controls/StrugController.h>
 
-#define DEBUG_GENERATOR 1
-
 extern Strug::ResourceManager *game_resource_manager;
 
 const float Play::BASE_RUNNING_SPEED = 0.5f;
@@ -49,7 +47,6 @@ class MazeController: public StrugController
           handled = true;
           break;
         case StrugController::BUTTON_FIRE:
-          log("FIRE!");
           context.requestStateChange(std::unique_ptr<State>(new Play()));
           handled = true;
           break;
@@ -123,30 +120,23 @@ void Play::init(Context &context)
   // set actual speeds
   runningSpeed = BASE_RUNNING_SPEED * blockWidth;
   
+  mazeGenerator.createMaze();
+
+  std::pair<int,int> exitCoords =
+    mazeGenerator.getExit(::rand() % mazeGenerator.getNumberOfExits());
+  log("Spawn player at exit (area coords): %d, %d", exitCoords.first, exitCoords.second);
+    
   // Create and initialize the player
   Player *playerCharacter = new Player();
   playerCharacter->initialize("common", blockWidth, blockHeight);
-  int playerBlockCoord = Level::AREA_WIDTH_BLOCKS / 2;
-  int playerAreaCoord  = areaCoordFromBlockCoord(playerBlockCoord);
-  applyStartingRulesForBlock(*playerCharacter, playerBlockCoord, playerBlockCoord);
-  prevPlayerBlockCoordX = prevPlayerBlockCoordY = playerBlockCoord;
-  prevPlayerAreaCoordX = prevPlayerAreaCoordY = playerAreaCoord;
+  prevPlayerBlockCoordX = Level::AREA_WIDTH_BLOCKS * exitCoords.first  + Level::AREA_WIDTH_BLOCKS  / 2;
+  prevPlayerBlockCoordY = Level::AREA_WIDTH_BLOCKS * exitCoords.second + Level::AREA_WIDTH_BLOCKS / 2;
+  prevPlayerAreaCoordX  = areaCoordFromBlockCoord(prevPlayerBlockCoordX);
+  prevPlayerAreaCoordY  = areaCoordFromBlockCoord(prevPlayerBlockCoordY);
+  applyStartingRulesForBlock(*playerCharacter, prevPlayerBlockCoordX, prevPlayerBlockCoordY);
   context.add(playerCharacter);
- 
-  mazeGenerator.createMaze();
-  /*
-  for (int i = 0; i < MazeGenerator::MAZE_WIDTH; ++i) {
-    for (int j = 0; j < MazeGenerator::MAZE_HEIGHT; ++j) {
-      
-      
-      if (!mazeGenerator.isCellPassable(i, j)) {
-        Block *block = new Terrain();
-        block->initialize("cave", blockWidth, blockHeight);
-        applyStartingRulesForBlock(*block, i, j);
-        context.add(block);
-      }
-    }
-  }*/
+  
+  addMoreAreas(context, prevPlayerAreaCoordX, prevPlayerAreaCoordY);
   
   controller = new MazeController(context, *this);
   context.setController(*controller);
@@ -177,7 +167,6 @@ void Play::applyRules(Context &context)
     || playerBlockCoordY != prevPlayerBlockCoordY;
   
   if (playerMovedToAnotherCell) {
-    log("Player moved to another cell");
     int playerAreaCoordX  = areaCoordFromBlockCoord(playerBlockCoordX);
     int playerAreaCoordY  = areaCoordFromBlockCoord(playerBlockCoordY);
     
@@ -186,7 +175,6 @@ void Play::applyRules(Context &context)
       || playerAreaCoordY != prevPlayerAreaCoordY;
     
     if (playerMovedToAnotherArea) {
-      log("Player moved to another area");
       addMoreAreas(context, playerAreaCoordX, playerAreaCoordY);
       
       prevPlayerAreaCoordX = playerAreaCoordX;
@@ -216,7 +204,7 @@ void Play::addMoreAreas(Context &context, int area_x, int area_y)
         MazeGenerator::MazeCell cell = mazeGenerator.getCellAt(i, j);
         
         if (!cell.passable) {
-          log("THIS AREA IS NOT PASSABLE, NOT GENERATING IT");
+          addArea(context, i, j, WorldGenerator::AREA_FULL);
           continue;
         }
         
@@ -266,7 +254,6 @@ void Play::addMoreAreas(Context &context, int area_x, int area_y)
 
 void Play::addArea(Context &context, int area_x, int area_y, WorldGenerator::AreaType type)
 {
-  log("GENERATING AREA (%d, %d)", area_x, area_y);
   Area *area = new Area(Level::AREA_WIDTH_BLOCKS);
   generator.fillArea(area, areaMap, area_x, area_y, type);
   
@@ -286,7 +273,6 @@ void Play::addArea(Context &context, int area_x, int area_y, WorldGenerator::Are
   
   areaMap[std::pair<int,int>(area_x, area_y)] = area;
 }
-
 
 int Play::getBlockCoordX(Block &object)
 {

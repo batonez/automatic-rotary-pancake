@@ -4,6 +4,15 @@
 #include <strug/generator/SimpleGenerator.h>
 #include <strug/blocks/Terrain.h>
 
+void SimpleGenerator::fillAll(Area *area)
+{
+  for (int j = 0; j < area->getHeightInBlocks(); ++j) {
+    for (int i = 0; i < area->getWidthInBlocks(); ++i) {
+      area->add(new Terrain(), i, j);
+    }
+  }
+}
+
 void SimpleGenerator::fillRandom(Area *area)
 {
   for (int j = 0; j < area->getHeightInBlocks(); ++j) {

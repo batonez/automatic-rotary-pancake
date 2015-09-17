@@ -27,25 +27,25 @@ void TCross::calculatePassageTurnStripe(
   assert(bottom_terrain_height >= 0);
   assert(top_terrain_height >= 0);
 
-  log("Old terrain bottom: %d, top: %d", bottom_terrain_height, top_terrain_height);
+  GENERATOR_LOG("Old terrain bottom: %d, top: %d", bottom_terrain_height, top_terrain_height);
   
   int oldBottomHeight = bottom_terrain_height;
   int oldTopHeight    = top_terrain_height;
   
   if (current_stripe_number >= to_left_width && current_stripe_number < area_width - to_right_width) {
     bottom_terrain_height = 0;
-    log("Bottom terrain height is set to zero (after turn)");
+    GENERATOR_LOG("Bottom terrain height is set to zero (after turn)");
   } else {
     // Min and max passage height
     int maxHeightThisCol = area_height - oldTopHeight - min_passage_thickness;
     int minHeightThisCol = 1;
     
     // generating bottom terrain
-    log("Bottom steepness:");
+    GENERATOR_LOG("Bottom steepness:");
     Vector2i bottomSteepness;
 
     if (current_stripe_number < area_width - to_right_width) {
-      log("Bottom terrain min height: %d, Max height: %d", minHeightThisCol, maxHeightThisCol);
+      GENERATOR_LOG("Bottom terrain min height: %d, Max height: %d", minHeightThisCol, maxHeightThisCol);
       bottomSteepness = get_constrained_steepness(to_left_width, minHeightThisCol, maxHeightThisCol, oldBottomHeight, 1, current_stripe_number, max_bottom_steepness);
     } else {
       // corner blocking with the right neighbor col
@@ -53,7 +53,7 @@ void TCross::calculatePassageTurnStripe(
         maxHeightThisCol = std::min<int>(area_height - to_top_terrain_height - min_passage_thickness, maxHeightThisCol);
       }
     
-      log("Bottom terrain min height: %d, Max height: %d", minHeightThisCol, maxHeightThisCol);
+      GENERATOR_LOG("Bottom terrain min height: %d, Max height: %d", minHeightThisCol, maxHeightThisCol);
     
       bottomSteepness = get_constrained_steepness(area_width, minHeightThisCol, maxHeightThisCol, oldBottomHeight, to_bottom_terrain_height, current_stripe_number, max_bottom_steepness);
     }
@@ -64,7 +64,7 @@ void TCross::calculatePassageTurnStripe(
   
   int spaceLeft = area_height - bottom_terrain_height;
   // the rest of the code should be completely as in straight
-  log("Generateed bottom terrain: %d, Space left: %d", bottom_terrain_height, spaceLeft);
+  GENERATOR_LOG("Generateed bottom terrain: %d, Space left: %d", bottom_terrain_height, spaceLeft);
   
   // Min and max passage height
   int maxHeightThisCol;
@@ -90,10 +90,10 @@ void TCross::calculatePassageTurnStripe(
  //   minHeightThisCol = std::max<int>(spaceLeft - max_passage_thickness, 1);
  // }
   
-  log("Top terrain min height: %d, Max height: %d", minHeightThisCol, maxHeightThisCol);
+  GENERATOR_LOG("Top terrain min height: %d, Max height: %d", minHeightThisCol, maxHeightThisCol);
   
   // generating top terrain
-  log("Top steepness:");
+  GENERATOR_LOG("Top steepness:");
   
   // as in straight
   Vector2i topSteepness = get_constrained_steepness(area_width, minHeightThisCol, maxHeightThisCol, oldTopHeight, to_top_terrain_height, current_stripe_number, max_top_steepness);
@@ -101,7 +101,7 @@ void TCross::calculatePassageTurnStripe(
   top_terrain_height = 
     ::rand() % (topSteepness.x + topSteepness.y + 1) + oldTopHeight - topSteepness.x;
   
-  log("RESULT: Terrain bottom: %d, top: %d, passage: %d", bottom_terrain_height, top_terrain_height, area_height - top_terrain_height - bottom_terrain_height);
+  GENERATOR_LOG("RESULT: Terrain bottom: %d, top: %d, passage: %d", bottom_terrain_height, top_terrain_height, area_height - top_terrain_height - bottom_terrain_height);
 }
 
 void TCross::createPassageTurn(
@@ -155,7 +155,7 @@ void TCross::createPassageTurn(
   
   // generating first column
   if (bottomTerrainHeight && topTerrainHeight) {
-    log ("========= FIRST COL============");
+    GENERATOR_LOG ("========= FIRST COL============");
     calculatePassageTurnStripe(
       bottomTerrainHeight,
       topTerrainHeight,
@@ -172,12 +172,12 @@ void TCross::createPassageTurn(
       max_bottom_steepness
     );
   } else {
-    log("========= RANDOM FIRST COL============");
+    GENERATOR_LOG("========= RANDOM FIRST COL============");
     bottomTerrainHeight = ::rand() % (areaHeight - max_passage_thickness - 1) + 1;
     int spaceLeft = areaHeight - bottomTerrainHeight;
-    log("Bottom terrain: %d, space left: %d", bottomTerrainHeight, spaceLeft);
+    GENERATOR_LOG("Bottom terrain: %d, space left: %d", bottomTerrainHeight, spaceLeft);
     topTerrainHeight    = ::rand() % (max_passage_thickness - min_passage_thickness) + spaceLeft - max_passage_thickness;
-    log("RESULT: Bottom terrain: %d, top terrain: %d, passage: %d", bottomTerrainHeight, topTerrainHeight, areaWidth - bottomTerrainHeight - topTerrainHeight);
+    GENERATOR_LOG("RESULT: Bottom terrain: %d, top terrain: %d, passage: %d", bottomTerrainHeight, topTerrainHeight, areaWidth - bottomTerrainHeight - topTerrainHeight);
   }
 
   fill_stripe(area, 0, topTerrainHeight, bottomTerrainHeight, transpose, invert_x, invert_y);
@@ -198,7 +198,7 @@ void TCross::createPassageTurn(
   
   // generating the rest of the columns
   for (int i = 1; i < areaWidth; ++i) {
-    log ("========= COL %d ============", i);
+    GENERATOR_LOG ("========= COL %d ============", i);
     calculatePassageTurnStripe(
       bottomTerrainHeight,
       topTerrainHeight,

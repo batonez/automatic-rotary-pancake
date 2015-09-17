@@ -6,7 +6,10 @@ class WorldGenerator
 {
   public:
     enum AreaType
-    { // straight
+    {
+      // no passage
+      AREA_FULL,
+      // straight
       PASSAGE_HORIZONTAL,
       PASSAGE_VERTICAL,
       // Turns
@@ -19,7 +22,6 @@ class WorldGenerator
       PASSAGE_TCROSS_BLIND_BOTTOM,
       PASSAGE_TCROSS_BLIND_LEFT,
       PASSAGE_TCROSS_BLIND_RIGHT,
-      
       PASSAGE_XCROSS
     };
     

@@ -5,14 +5,18 @@
 
 #include <glade/debug/log.h>
 #include <glade/math/vector.h>
-#include <strug/generator/WorldGenerator.h>
 #include <strug/Level.h>
 #include <strug/blocks/Terrain.h>
+#include <strug/generator/WorldGenerator.h>
 #include <strug/exception/StrugException.h>
+#include <strug/generator/SimpleGenerator.h>
 #include <strug/generator/StraightPassage.h>
 #include <strug/generator/PassageTurn.h>
 #include <strug/generator/TCross.h>
 #include <strug/generator/XCross.h>
+
+#define MIN_PASSAGE_HEIGHT 4
+#define MAX_PASSAGE_HEIGHT 14
 
 WorldGenerator::WorldGenerator(long seed_param)
 {
@@ -78,8 +82,8 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
       StraightPassage::createStraightPassage( 
         area,
         true,
-        area->getHeightInBlocks() / 2,
-        3,
+        MAX_PASSAGE_HEIGHT,
+        MIN_PASSAGE_HEIGHT,
         leftNeighborTopHeight,
         leftNeighborBottomHeight,
         rightNeighborTopHeight,
@@ -90,8 +94,8 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
       StraightPassage::createStraightPassage( 
         area,
         false,
-        area->getHeightInBlocks() / 2,
-        3,
+        MAX_PASSAGE_HEIGHT,
+        MIN_PASSAGE_HEIGHT,
         bottomNeighborLeftWidth,
         bottomNeighborRightWidth,
         topNeighborLeftWidth,
@@ -105,8 +109,8 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
         false,
         false,
         false,
-        area->getHeightInBlocks() / 2,
-        3,
+        MAX_PASSAGE_HEIGHT,
+        MIN_PASSAGE_HEIGHT,
         leftNeighborTopHeight,
         leftNeighborBottomHeight,
         bottomNeighborLeftWidth,
@@ -120,8 +124,8 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
         false,
         false,
         true,
-        area->getHeightInBlocks() / 2,
-        3,
+        MAX_PASSAGE_HEIGHT,
+        MIN_PASSAGE_HEIGHT,
         leftNeighborTopHeight,
         leftNeighborBottomHeight,
         topNeighborLeftWidth,
@@ -135,8 +139,8 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
         false,
         true,
         false,
-        area->getHeightInBlocks() / 2,
-        3,
+        MAX_PASSAGE_HEIGHT,
+        MIN_PASSAGE_HEIGHT,
         rightNeighborTopHeight,
         rightNeighborBottomHeight,
         bottomNeighborRightWidth,
@@ -150,8 +154,8 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
         true,
         false,
         false,
-        area->getHeightInBlocks() / 2,
-        3,
+        MAX_PASSAGE_HEIGHT,
+        MIN_PASSAGE_HEIGHT,
         topNeighborLeftWidth,
         topNeighborRightWidth,
         rightNeighborTopHeight,
@@ -164,8 +168,8 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
         false,
         false,
         false,
-        area->getHeightInBlocks() / 2,
-        3,
+        MAX_PASSAGE_HEIGHT,
+        MIN_PASSAGE_HEIGHT,
         leftNeighborTopHeight,
         leftNeighborBottomHeight,
         rightNeighborTopHeight,
@@ -180,8 +184,8 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
         false,
         false,
         true,
-        area->getHeightInBlocks() / 2,
-        3,
+        MAX_PASSAGE_HEIGHT,
+        MIN_PASSAGE_HEIGHT,
         leftNeighborTopHeight,
         leftNeighborBottomHeight,
         rightNeighborBottomHeight,
@@ -196,8 +200,8 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
         true,
         false,
         true,
-        area->getHeightInBlocks() / 2,
-        3,
+        MAX_PASSAGE_HEIGHT,
+        MIN_PASSAGE_HEIGHT,
         topNeighborLeftWidth,
         topNeighborRightWidth,
         bottomNeighborRightWidth,
@@ -212,8 +216,8 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
         true,
         false,
         false,
-        area->getHeightInBlocks() / 2,
-        3,
+        MAX_PASSAGE_HEIGHT,
+        MIN_PASSAGE_HEIGHT,
         topNeighborLeftWidth,
         topNeighborRightWidth,
         bottomNeighborLeftWidth,
@@ -225,8 +229,8 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
     case PASSAGE_XCROSS:
       XCross::createPassageTurn(
         area,
-        area->getHeightInBlocks() / 2,
-        3,
+        MAX_PASSAGE_HEIGHT,
+        MIN_PASSAGE_HEIGHT,
         leftNeighborTopHeight,
         leftNeighborBottomHeight,
         rightNeighborTopHeight,
@@ -236,6 +240,9 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
         topNeighborLeftWidth,
         topNeighborRightWidth
       );
+      break;
+    case AREA_FULL:
+      SimpleGenerator::fillAll(area);
       break;
     default:
       throw StrugException("Unknown passage type");

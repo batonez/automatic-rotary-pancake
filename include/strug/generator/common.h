@@ -2,6 +2,12 @@
 
 #include <strug/Level.h>
 
+#ifdef DEBUG_GENERATOR
+#define GENERATOR_LOG(...) log(...)
+#else
+#define GENERATOR_LOG(...)
+#endif
+
 int not_negative(int val);
 
 void fill_stripe(
