@@ -32,7 +32,7 @@ class Level
     BlocksMap         levelData;
     BlockTypesMap     blockTypesData;
     std::string       texturePackName;
-    IntGenerationInfo intAtrributes;
+    IntGenerationInfo intAttributes;
   
   private:
     int width, height;
