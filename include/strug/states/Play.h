@@ -5,7 +5,7 @@
 #include <glade/State.h>
 #include <glade/math/Vector.h>
 #include <strug/Level.h>
-#include <strug/WorldGenerator.h>
+#include <strug/generator/WorldGenerator.h>
 
 class Context;
 class Block;

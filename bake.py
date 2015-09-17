@@ -23,6 +23,8 @@ os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'generator', 'World
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'generator', 'SimpleGenerator.cpp'),
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'generator', 'StraightPassage.cpp'),
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'generator', 'PassageTurn.cpp'),
+os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'generator', 'TCross.cpp'),
+os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'generator', 'common.cpp'),
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'states', 'Play.cpp'),
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'blocks', 'Terrain.cpp'),
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'blocks', 'Block.cpp'),

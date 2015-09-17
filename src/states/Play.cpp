@@ -16,11 +16,13 @@ class CharacterController: public StrugController
 {
   private:
     Play &playState;
+    Context &context;
     
   public:
-    CharacterController(Play &play_state):
+    CharacterController(Context &context_param, Play &play_state):
       StrugController(),
-      playState(play_state)
+      playState(play_state),
+      context(context_param)
     {}
     
     bool buttonPress(int id, int terminalId)
@@ -46,6 +48,7 @@ class CharacterController: public StrugController
           break;
         case StrugController::BUTTON_FIRE:
           log("FIRE!");
+          context.requestStateChange(std::unique_ptr<State>(new Play()));
           handled = true;
           break;
       }
@@ -90,7 +93,8 @@ Play::Play():
   screenScaleY(0),
   controller(NULL),
   player(NULL),
-  generator(1438337493)
+  //generator(1438337493)
+  generator()
 {}
 
 Play::~Play()
@@ -130,15 +134,51 @@ void Play::init(Context &context)
   context.add(playerCharacter);
 
   // Generate starting areas
-//  addMoreAreas(context, playerAreaCoord, playerAreaCoord);
+  // addMoreAreas(context, playerAreaCoord, playerAreaCoord);
   
-  addArea(context, 1, 0, WorldGenerator::PASSAGE_LEFT_TO_BOTTOM);
+  // Г-образные
+   
+/*  
   addArea(context, 0, 0, WorldGenerator::PASSAGE_HORIZONTAL);
   addArea(context, 1, 1, WorldGenerator::PASSAGE_VERTICAL);
+  addArea(context, 1, 0, WorldGenerator::PASSAGE_LEFT_TO_BOTTOM);
 
+  addArea(context, 0, 0, WorldGenerator::PASSAGE_HORIZONTAL);
+  addArea(context, 1, -1, WorldGenerator::PASSAGE_VERTICAL);
+  addArea(context, 1, 0, WorldGenerator::PASSAGE_LEFT_TO_TOP);
   
+  addArea(context, 0, 0, WorldGenerator::PASSAGE_VERTICAL);
+  addArea(context, 1, 1, WorldGenerator::PASSAGE_HORIZONTAL);
+  addArea(context, 0, 1, WorldGenerator::PASSAGE_TOP_TO_RIGHT);
+
+  addArea(context, 1, 0, WorldGenerator::PASSAGE_HORIZONTAL);
+  addArea(context, 0, 1, WorldGenerator::PASSAGE_VERTICAL);
+  addArea(context, 0, 0, WorldGenerator::PASSAGE_BOTTOM_TO_RIGHT);
+*/
+
+  // Ромб
+/*
+  addArea(context, 0, 0, WorldGenerator::PASSAGE_BOTTOM_TO_RIGHT);
+  addArea(context, 1, 0, WorldGenerator::PASSAGE_LEFT_TO_BOTTOM);
+  addArea(context, 1, 1, WorldGenerator::PASSAGE_LEFT_TO_TOP);
+  addArea(context, 0, 1, WorldGenerator::PASSAGE_TOP_TO_RIGHT);
+*/
+
+  // Наклонная
+/*
+  addArea(context, 0, 0, WorldGenerator::PASSAGE_BOTTOM_TO_RIGHT);
+  addArea(context, 1, 0, WorldGenerator::PASSAGE_LEFT_TO_TOP);
+  addArea(context, 1, -1, WorldGenerator::PASSAGE_BOTTOM_TO_RIGHT);
+  addArea(context, 2, -1, WorldGenerator::PASSAGE_LEFT_TO_TOP);
+  addArea(context, 2, -2, WorldGenerator::PASSAGE_BOTTOM_TO_RIGHT);
+*/ 
+
+  // Т-образные
+  addArea(context, 0, 0, WorldGenerator::PASSAGE_TCROSS_BLIND_TOP);
+  
+
   // Setup controls
-  controller = new CharacterController(*this);
+  controller = new CharacterController(context, *this);
   context.setController(*controller);
 }
 
@@ -181,7 +221,7 @@ void Play::applyRules(Context &context)
 
   context.renderer->camera.position->x = player->getTransform()->position->x;
   context.renderer->camera.position->y = player->getTransform()->position->y;
-/*  
+  
   int playerBlockCoordX = getBlockCoordX(*player);
   int playerBlockCoordY = getBlockCoordY(*player);
   
@@ -206,7 +246,7 @@ void Play::applyRules(Context &context)
     
     prevPlayerBlockCoordX = playerBlockCoordX;
     prevPlayerBlockCoordY = playerBlockCoordY;
-  } */
+  }
 }
 
 void Play::addMoreAreas(Context &context, int area_x, int area_y)

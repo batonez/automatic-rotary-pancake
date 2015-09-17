@@ -1,9 +1,8 @@
 #pragma once
 
 #include <strug/Level.h>
-class Vector2i;
 
-class PassageTurn
+class TCross
 {
   public:
     static void createPassageTurn(
@@ -17,6 +16,8 @@ class PassageTurn
       int   from_bottom_height    = 0,
       int   to_top_height         = 0,
       int   to_bottom_height      = 0,
+      int   to_left_width         = 0,
+      int   to_right_width        = 0,
       int   max_top_steepness     = 2,
       int   max_bottom_steepness  = 2
     );
@@ -27,6 +28,8 @@ class PassageTurn
       /*in-out*/ int &top_terrain_height,
       int to_bottom_terrain_height,
       int to_top_terrain_height,
+      int to_left_width,
+      int to_right_width,
       int area_width,
       int area_height,
       int current_stripe_number,

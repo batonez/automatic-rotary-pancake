@@ -7,48 +7,7 @@
 #include <strug/generator/StraightPassage.h>
 #include <strug/blocks/Terrain.h>
 #include <strug/exception/StrugException.h>
-
-Vector2i StraightPassage::getConstrainedSteepness(
-  int area_width,
-  int min_height_this_col,
-  int max_height_this_col,
-  int from_height,
-  int to_height,
-  int current_stripe_number,
-  int max_steepness)
-{
-  Vector2i result(max_steepness, max_steepness);
-  log("S %d %d", result.x, result.y);
-  
-  // Cannot let the passage be taller than max passage height  
-  result.x = std::min<int>(from_height - min_height_this_col, result.x);  
-  // Exclude corner blocking
-  result.y = std::min<int>(max_height_this_col - from_height, result.y);
-  
-  log("S %d %d", result.x, result.y);
-  
-  if (!from_height || !to_height) {
-    return result;
-  }
-  
-  int colsLeft = area_width - current_stripe_number;
-  int maxFinalHeight = from_height + colsLeft * max_steepness;
-  int minFinalHeight = from_height - colsLeft * max_steepness;
-  int maxRequiredFinalHeight = to_height + max_steepness;
-  int minRequiredFinalHeight = to_height - max_steepness;
-  
-  if (maxFinalHeight <=  maxRequiredFinalHeight) {
-    result.x = -result.y;
-  }
-  
-  if (minFinalHeight >= minRequiredFinalHeight) {
-    result.y = -result.x;
-  }
-  
-  log("S %d %d", result.x, result.y);
-  
-  return result;
-}
+#include <strug/generator/common.h>
 
 void StraightPassage::calculateStraightPassageStripe(
   /*in-out*/ int &bottom_terrain_height,
@@ -74,6 +33,7 @@ void StraightPassage::calculateStraightPassageStripe(
   // Min and max passage height
   int maxHeightThisCol = area_height - oldTopHeight - min_passage_thickness;
   
+  // corner blocking with the right neighbor col
   if (area_width - current_stripe_number == 1 && to_bottom_terrain_height) {
     maxHeightThisCol = std::min<int>(area_height - to_top_terrain_height - min_passage_thickness, maxHeightThisCol);
   }
@@ -84,7 +44,7 @@ void StraightPassage::calculateStraightPassageStripe(
   
   // generating bottom terrain
   log("Bottom steepness:");
-  Vector2i bottomSteepness = getConstrainedSteepness(area_width, minHeightThisCol, maxHeightThisCol, oldBottomHeight, to_bottom_terrain_height, current_stripe_number, max_bottom_steepness);
+  Vector2i bottomSteepness = get_constrained_steepness(area_width, minHeightThisCol, maxHeightThisCol, oldBottomHeight, to_bottom_terrain_height, current_stripe_number, max_bottom_steepness);
 
   bottom_terrain_height = 
     ::rand() % (bottomSteepness.x + bottomSteepness.y + 1) + oldBottomHeight - bottomSteepness.x;
@@ -111,36 +71,12 @@ void StraightPassage::calculateStraightPassageStripe(
   
   // generating top terrain
   log("Top steepness:");
-  Vector2i topSteepness = getConstrainedSteepness(area_width, minHeightThisCol, maxHeightThisCol, oldTopHeight, to_top_terrain_height, current_stripe_number, max_top_steepness);
+  Vector2i topSteepness = get_constrained_steepness(area_width, minHeightThisCol, maxHeightThisCol, oldTopHeight, to_top_terrain_height, current_stripe_number, max_top_steepness);
   
   top_terrain_height = 
     ::rand() % (topSteepness.x + topSteepness.y + 1) + oldTopHeight - topSteepness.x;
     
   log("RESULT: Terrain bottom: %d, top: %d, passage: %d", bottom_terrain_height, top_terrain_height, area_height - top_terrain_height - bottom_terrain_height);
-}
-
-void StraightPassage::fillStraightPassageStripe(
-  Area *area,
-  int  col_index,
-  int  top_terrain_height,
-  int  bottom_terrain_height,
-  bool horizontal)
-{
-  if (horizontal) {
-    for (int j = 0; j < area->getHeightInBlocks(); ++j) {    
-      if (j < top_terrain_height || j >= area->getHeightInBlocks() - bottom_terrain_height) {
-        area->add(new Terrain(), col_index, j);
-      }
-    }
-  } else {
-    col_index = area->getHeightInBlocks() - col_index - 1;
-    
-    for (int j = 0; j < area->getHeightInBlocks(); ++j) {    
-      if (j < top_terrain_height || j >= area->getHeightInBlocks() - bottom_terrain_height) {
-        area->add(new Terrain(), j, col_index);
-      }
-    }
-  }  
 }
 
 void StraightPassage::createStraightPassage(
@@ -195,7 +131,7 @@ void StraightPassage::createStraightPassage(
     log("RESULT: Bottom terrain: %d, top terrain: %d, passage: %d", bottomTerrainHeight, topTerrainHeight, areaWidth - bottomTerrainHeight - topTerrainHeight);
   }
 
-  fillStraightPassageStripe(area, 0, topTerrainHeight, bottomTerrainHeight, horizontal);
+  fill_stripe(area, 0, topTerrainHeight, bottomTerrainHeight, !horizontal, !horizontal);
   
   if (horizontal) {
     area->intAttributes["left_exit_top_terrain_height"]    = topTerrainHeight;
@@ -222,14 +158,14 @@ void StraightPassage::createStraightPassage(
       max_bottom_steepness
     );
     
-    fillStraightPassageStripe(area, i, topTerrainHeight, bottomTerrainHeight, horizontal);
+    fill_stripe(area, i, topTerrainHeight, bottomTerrainHeight, !horizontal, !horizontal);
   }
   
   if (horizontal) {
     area->intAttributes["right_exit_top_terrain_height"]    = topTerrainHeight;
     area->intAttributes["right_exit_bottom_terrain_height"] = bottomTerrainHeight;
   } else {
-    area->intAttributes["top_exit_left_terrain_width"]    = topTerrainHeight;
+    area->intAttributes["top_exit_left_terrain_width"]  = topTerrainHeight;
     area->intAttributes["top_exit_right_terrain_width"] = bottomTerrainHeight;
   }
 }

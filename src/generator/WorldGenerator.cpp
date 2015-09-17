@@ -5,12 +5,13 @@
 
 #include <glade/debug/log.h>
 #include <glade/math/vector.h>
-#include <strug/WorldGenerator.h>
+#include <strug/generator/WorldGenerator.h>
 #include <strug/Level.h>
 #include <strug/blocks/Terrain.h>
 #include <strug/exception/StrugException.h>
 #include <strug/generator/StraightPassage.h>
 #include <strug/generator/PassageTurn.h>
+#include <strug/generator/TCross.h>
 
 WorldGenerator::WorldGenerator(long seed_param)
 {
@@ -47,19 +48,15 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
   int toRightTerrainWidth     = 0;
  
   try {
-    log("A");
     adjancentLeft = map.at(std::pair<int,int>(area_x - 1, area_y));
     fromTopTerrainHeight = adjancentLeft->intAttributes.at("right_exit_top_terrain_height");
     fromBottomTerrainHeight = adjancentLeft->intAttributes.at("right_exit_bottom_terrain_height");
-    log("AA");
   } catch (std::out_of_range &e) {}
   
   try {
-    log("B");
     adjancentRight = map.at(std::pair<int,int>(area_x + 1, area_y));
     toTopTerrainHeight = adjancentRight->intAttributes.at("left_exit_top_terrain_height");
     toBottomTerrainHeight = adjancentRight->intAttributes.at("left_exit_bottom_terrain_height");
-    log("BB");
   } catch (std::out_of_range &e) {}
 
   try {
@@ -101,9 +98,12 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
       );
       break;
     case PASSAGE_LEFT_TO_BOTTOM:
-      PassageTurn::createStraightPassage(
+    case PASSAGE_BOTTOM_TO_LEFT:
+      PassageTurn::createPassageTurn(
         area,
-        true,
+        false,
+        false,
+        false,
         area->getHeightInBlocks() / 2,
         3,
         fromTopTerrainHeight,
@@ -113,10 +113,65 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
       );
       break;
     case PASSAGE_LEFT_TO_TOP:
+    case PASSAGE_TOP_TO_LEFT:
+      PassageTurn::createPassageTurn(
+        area,
+        false,
+        false,
+        true,
+        area->getHeightInBlocks() / 2,
+        3,
+        fromTopTerrainHeight,
+        fromBottomTerrainHeight,
+        toLeftTerrainWidth,
+        toRightTerrainWidth
+      );
       break;
     case PASSAGE_BOTTOM_TO_RIGHT:
+    case PASSAGE_RIGHT_TO_BOTTOM:
+      PassageTurn::createPassageTurn(
+        area,
+        false,
+        true,
+        false,
+        area->getHeightInBlocks() / 2,
+        3,
+        toTopTerrainHeight,
+        toBottomTerrainHeight,
+        fromRightTerrainWidth,
+        fromLeftTerrainWidth
+      );
       break;
     case PASSAGE_TOP_TO_RIGHT:
+    case PASSAGE_RIGHT_TO_TOP:
+      PassageTurn::createPassageTurn(
+        area,
+        true,
+        false,
+        false,
+        area->getHeightInBlocks() / 2,
+        3,
+        toLeftTerrainWidth,
+        toRightTerrainWidth,
+        toTopTerrainHeight,
+        toBottomTerrainHeight
+      );
+      break;
+    case PASSAGE_TCROSS_BLIND_TOP:
+      TCross::createPassageTurn(
+        area,
+        false,
+        false,
+        false,
+        area->getHeightInBlocks() / 2,
+        3,
+        fromTopTerrainHeight,
+        fromBottomTerrainHeight,
+        toTopTerrainHeight,
+        toBottomTerrainHeight,
+        fromLeftTerrainWidth,
+        fromRightTerrainWidth
+      );
       break;
     default:
       throw StrugException("Unknown passage type");
