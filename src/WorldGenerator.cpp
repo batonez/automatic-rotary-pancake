@@ -1,4 +1,5 @@
 #include <glade/debug/log.h>
+#include <glade/math/vector.h>
 #include <strug/WorldGenerator.h>
 #include <strug/Level.h>
 #include <strug/blocks/Terrain.h>
@@ -6,6 +7,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <algorithm>
+#include <assert.h>
 
 // Area generation algorigthms: ================================================
 
@@ -84,42 +86,35 @@ static void calculateVerticalTerrainLine(
   int area_height,
   int max_passage_height,
   int min_passage_height,
-  int top_steepness,
-  int bottom_steepness
+  Vector2i top_steepness,
+  Vector2i bottom_steepness
 )
 {
   int oldBottomHeight = bottom_terrain_height;
   int oldTopHeight    = top_terrain_height;
-  int range;
-  
-  // generating bottom terrain
-  if (oldBottomHeight - bottom_steepness < 1) {
-    range = bottom_steepness + 1;
-  } else {
-    range = bottom_steepness * 2 + 1;
-  }
 
+  // generating bottom terrain
+  bottom_steepness.x = std::min<int>(oldBottomHeight - 1, bottom_steepness.x);
+  
   bottom_terrain_height = std::min<int>(
-    ::rand() % (range) + std::max<int>(oldBottomHeight - bottom_steepness, 1),
+    ::rand() % (bottom_steepness.x + bottom_steepness.y + 1) + bottom_terrain_height - bottom_steepness.x,
     area_height - oldTopHeight - min_passage_height - (oldTopHeight ? 0 : 1)
   );
 
   // generating top terrain
   int spaceLeft = area_height - bottom_terrain_height;
+  top_steepness.x = std::min<int>(oldTopHeight - 1, top_steepness.x);
   
-  if (oldTopHeight - top_steepness < 1) {
-    range = top_steepness + 1;
-  } else {
-    range = top_steepness * 2 + 1;
-  }
+  log("STEEPNESS %d %d", top_steepness.x, top_steepness.y);
   
   top_terrain_height = std::min<int>(
-    ::rand() % (range) + std::max<int>(oldTopHeight - top_steepness, 1),
+    ::rand() % (top_steepness.x + top_steepness.y + 1) + top_terrain_height - top_steepness.x,
     std::min<int>(
       area_height - oldBottomHeight - min_passage_height,
       spaceLeft - min_passage_height
     )
   );
+  log("FOO");
 }
 
 static void fillVerticalTerrainLine(
@@ -158,13 +153,16 @@ static void fillHorizontalPassage(
       areaHeight,
       max_passage_height,
       min_passage_height,
-      top_steepness,
-      bottom_steepness
+      Vector2i(top_steepness, top_steepness),
+      Vector2i(bottom_steepness, bottom_steepness)
     );
   } else {
     bottomTerrainHeight = ::rand() % (areaHeight - min_passage_height - 1) + 1;
     topTerrainHeight    = ::rand() % (areaHeight - bottomTerrainHeight - min_passage_height) + 1;
   }
+
+  assert(bottomTerrainHeight);
+  assert(topTerrainHeight);
   
   fillVerticalTerrainLine(area, 0, topTerrainHeight, bottomTerrainHeight);
   
@@ -179,9 +177,12 @@ static void fillHorizontalPassage(
       areaHeight,
       max_passage_height,
       min_passage_height,
-      top_steepness,
-      bottom_steepness
+      Vector2i(top_steepness, top_steepness),
+      Vector2i(bottom_steepness, bottom_steepness)
     );
+    
+    assert(bottomTerrainHeight);
+    assert(topTerrainHeight);
     
     fillVerticalTerrainLine(area, i, topTerrainHeight, bottomTerrainHeight);
   }
