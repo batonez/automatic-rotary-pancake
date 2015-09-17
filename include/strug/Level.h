@@ -29,13 +29,13 @@ class Level
     BlocksMap     levelData;
     BlockTypesMap blockTypesData;
     std::string   texturePackName;
-  
-  private:
+    
     Level *adjancent_top;
     Level *adjancent_bottom;
     Level *adjancent_left;
     Level *adjancent_right;
-    
+  
+  private:
     int width, height;
     std::map<int,Block*>      labeledBlocks; // may point to a deleted object. Always check levelData first
     std::map<int,Block::Type> coexistingBlockTypes; // (base block) -> (overlay block)
@@ -59,11 +59,6 @@ class Level
     int    getHeightInBlocks()           { return height; }
     bool   isThereATerrain(int x, int y) { return getTerrainAt(x, y) != NULL; }
     Block* getBlockByLabel(int label)    { return labeledBlocks.at(label); }
-    
-    Level const * getAdjancentTop()    { return adjancent_top;    }
-    Level const * getAdjancentBottom() { return adjancent_bottom; }
-    Level const * getAdjancentLeft()   { return adjancent_left;   }
-    Level const * getAdjancentRight()  { return adjancent_right;  }
 };
 
 typedef Level Area;

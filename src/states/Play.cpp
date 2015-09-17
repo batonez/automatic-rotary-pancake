@@ -1,31 +1,94 @@
-//#include <glade/physics/CollisionEventListener.h>
-//#include <glade/math/Graph.h>
 #include <glade/Context.h>
 #include <strug/Level.h>
 #include <strug/ResourceManager.h>
 #include <strug/blocks/Terrain.h>
 #include <strug/blocks/Player.h>
 #include <strug/states/Play.h>
+#include <strug/controls/StrugController.h>
 
 extern Strug::ResourceManager *game_resource_manager;
 
-const float Play::BASE_RUNNING_SPEED = 0.004f;
+const float Play::BASE_RUNNING_SPEED = 0.2f;
 const int   Play::AREA_WIDTH_BLOCKS = 10;
 
-Play::Play(const LevelInfo &level_info):
+class CharacterController: public StrugController
+{
+  private:
+    Play &playState;
+    
+  public:
+    CharacterController(Play &play_state):
+      StrugController(),
+      playState(play_state)
+    {}
+    
+    bool buttonPress(int id, int terminalId)
+    {
+      bool handled = false;
+      
+      switch (id) {
+        case StrugController::BUTTON_LEFT:
+          playState.cameraMan.x = -1;
+          handled = true;
+          break;
+        case StrugController::BUTTON_RIGHT:
+          playState.cameraMan.x =  1;
+          handled = true;
+          break;
+        case StrugController::BUTTON_UP:
+          playState.cameraMan.y = -1;
+          handled = true;
+          break;
+        case StrugController::BUTTON_DOWN:
+          playState.cameraMan.y =  1;
+          handled = true;
+          break;
+      }
+      
+      return handled;
+    }
+  
+    bool buttonRelease(int id, int terminalId)
+    {
+      bool handled = false;
+      
+      switch (id) {
+        case StrugController::BUTTON_LEFT:
+          playState.cameraMan.x = 0;
+          handled = true;
+          break;
+        case StrugController::BUTTON_RIGHT:
+          playState.cameraMan.x = 0;
+          handled = true;
+          break;
+        case StrugController::BUTTON_UP:
+          playState.cameraMan.y = 0;
+          handled = true;
+          break;
+        case StrugController::BUTTON_DOWN:
+          playState.cameraMan.y = 0;
+          handled = true;
+          break;
+      }
+      
+      return handled;
+    }
+    
+    void init()
+    {  
+    }
+};
+
+Play::Play():
   State(),
-  levelScaleX(0),
-  levelScaleY(0),
-  backgroundView(NULL),
-  levelInfo(level_info)
+  screenScaleX(0),
+  screenScaleY(0),
+  controller(NULL),
+  player(NULL)
 {}
 
 Play::~Play()
 {
-  if (backgroundView != NULL) {
-    delete backgroundView;
-    backgroundView = NULL;
-  }
 }
 
 void Play::init(Context &context)
@@ -34,42 +97,104 @@ void Play::init(Context &context)
   context.renderer->setSceneProjectionMode(GladeRenderer::ORTHO);
   //context.renderer->setDrawingOrderComparator(new Block.DrawingOrderComparator());
   
-  levelScaleX = context.renderer->getViewportWidthCoords()  / 2;
-  levelScaleY = context.renderer->getViewportHeightCoords() / 2;
+  screenScaleX = context.renderer->getViewportWidthCoords()  / 2;
+  screenScaleY = context.renderer->getViewportHeightCoords() / 2;
   
+  blockWidth = blockHeight = min(
+    context.renderer->getViewportWidthCoords()  / AREA_WIDTH_BLOCKS,
+    context.renderer->getViewportHeightCoords() / AREA_WIDTH_BLOCKS
+  );
+  
+  // set actual speeds
+  runningSpeed = BASE_RUNNING_SPEED * blockWidth;
+  
+  Player *playerCharacter = new Player();
+  playerCharacter->initialize("common", blockWidth, blockHeight);
+  applyStartingRulesForBlock(*playerCharacter, AREA_WIDTH_BLOCKS / 2, AREA_WIDTH_BLOCKS / 2);
+  context.add(playerCharacter);
+
+ controller = new CharacterController(*this);
+  context.setController(*controller);
+}
+
+void Play::addArea(Context &context, int area_x, int area_y)
+{
   Area *area = new Area(AREA_WIDTH_BLOCKS);
   generator.fillArea(area);
   
-  level = game_resource_manager->getLevel(levelInfo.path);
-
-  std::shared_ptr<ShaderProgram> program =
-      game_resource_manager->getShaderProgram("texcoord_frames.vertex.glsl", "textured.fragment.glsl");
-
-  blockWidth = blockHeight = min(
-    context.renderer->getViewportWidthCoords()  / level->getWidthInBlocks(),
-    context.renderer->getViewportHeightCoords() / level->getHeightInBlocks()
-  );
-  
   // initializing blocks and their game mechanics
-  for (int blockX = 0; blockX < level->getWidthInBlocks(); ++blockX) {
-    for (int blockY = 0; blockY < level->getHeightInBlocks(); ++blockY) {
-      Level::Blocks *blocksInThisCell = level->getObjectsAt(blockX, blockY);
+  for (int blockX = 0; blockX < area->getWidthInBlocks(); ++blockX) {
+    for (int blockY = 0; blockY < area->getHeightInBlocks(); ++blockY) {
+      Level::Blocks *blocksInThisCell = area->getObjectsAt(blockX, blockY);
       Level::Blocks::iterator block;
       
       for (block = blocksInThisCell->begin(); block != blocksInThisCell->end(); ++block) {
-        (*block)->initialize(level->texturePackName, blockWidth, blockHeight);
-        applyStartingRulesForBlock(**block, blockX, blockY);
-        //context.soundPlayer.hold(block->getSounds());
+        (*block)->initialize(area->texturePackName, blockWidth, blockHeight);
+        applyStartingRulesForBlock(**block, blockX * area_x, blockY * area_y);
         context.add(*block);
       }
     }
   }
   
-  // set actual speeds
-  runningSpeed = BASE_RUNNING_SPEED * blockWidth;
+  areaMap[std::pair<int,int>(area_x, area_y)] = area;
 }
 
-void Play::applyStartingRulesForBlock(const Block &block, int block_x, int block_y)
+void Play::applyStartingRulesForBlock(Block &block, int block_x, int block_y)
 {
-  // TODO
+  block.getTransform()->setPosition(blockToWorldCoordX(block_x), blockToWorldCoordY(block_y), 0);
+  
+  if (block.getType() == Block::PLAYER) {
+    player = (Player*) &block;
+  }
 }
+
+void Play::applyRules(Context &context)
+{
+  player->getTransform()->position->x += cameraMan.x * runningSpeed;
+  player->getTransform()->position->y += cameraMan.y * runningSpeed;
+
+  context.renderer->camera.position->x = player->getTransform()->position->x;
+  context.renderer->camera.position->y = player->getTransform()->position->y;
+  
+  int playerBlockCoordX = getBlockCoordX(*player);
+  int playerBlockCoordY = getBlockCoordY(*player);
+  
+  //log("%d, %d", areaCoordFromBlockCoord(playerBlockCoordX), areaCoordFromBlockCoord(playerBlockCoordY));
+  log("%d, %d", playerBlockCoordX, playerBlockCoordY);
+  
+  if (!areaMap.count(std::pair<int,int>(1, 1))) {
+    addArea(context, 1, 1);
+  }
+}
+
+int Play::getBlockCoordX(Block &object)
+{
+  return ::floor(((object.getTransform()->position->x + screenScaleX) / blockWidth));
+}
+
+int Play::getBlockCoordY(Block &object)
+{
+  return ::floor(((object.getTransform()->position->y + screenScaleY) / blockHeight));
+}
+
+int Play::areaCoordFromBlockCoord(int blockCoord)
+{
+  if (blockCoord == 0) {
+    return 1;
+  }
+  
+  int correction = blockCoord > 0 ? 1 : 0;
+  return ::floor((float) blockCoord / (float) AREA_WIDTH_BLOCKS) + correction;
+}
+
+void Play::shutdown(Context &context)
+{
+  // TODO free level and other memory
+  
+  //context.setController(NULL);
+  
+  if (controller) {
+    delete controller;
+  }
+}
+    

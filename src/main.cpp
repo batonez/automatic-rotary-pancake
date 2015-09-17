@@ -17,11 +17,10 @@
 #include <strug/ResourceManager.h>
 #include <strug/controls/StrugController.h>
 #include <strug/exception/StrugException.h>
-#include <strug/LevelInfo.h>
 #include <strug/states/Play.h>
 
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 600
+#define VIEWPORT_WIDTH 600
+#define VIEWPORT_HEIGHT 600
 #define ASSETS_DIR "assets"
 
 // FIXME global resource manager is shit. Make it a part of context (Game Context probably should extend Glade Context)
@@ -83,6 +82,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
       break;
     case WM_INPUT:
     {
+      VirtualController *controller = gameContext->getController();
+      
       UINT dwSize;
 
       GetRawInputData((HRAWINPUT)lParam, RID_INPUT, NULL, &dwSize, sizeof(RAWINPUTHEADER));
@@ -98,70 +99,74 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
       RAWINPUT* rawInput = (RAWINPUT*)lpb;
 
-      if (rawInput->header.dwType == RIM_TYPEKEYBOARD) {
-        RAWKEYBOARD *keyboard = (RAWKEYBOARD*) &rawInput->data;
-        
-        // button is down
-        if (keyboard->Flags == RI_KEY_MAKE
-          || keyboard->Flags == RI_KEY_MAKE + RI_KEY_E0
-          || keyboard->Flags == RI_KEY_MAKE + RI_KEY_E1)
-        {
-          switch (keyboard->VKey) {
-            case VK_UP:
-              gameContext->getController()->buttonPress(StrugController::BUTTON_UP,    0);
-              break;
-            case VK_DOWN:
-              gameContext->getController()->buttonPress(StrugController::BUTTON_DOWN,  0);
-              break;
-            case VK_LEFT:
-              gameContext->getController()->buttonPress(StrugController::BUTTON_LEFT,  0);
-              break;
-            case VK_RIGHT:
-              gameContext->getController()->buttonPress(StrugController::BUTTON_RIGHT, 0);
-              break;
-            case VK_SPACE:
-              gameContext->getController()->buttonPress(StrugController::BUTTON_FIRE, 0);
-              break;
-            case VK_RETURN:
-              gameContext->getController()->buttonPress(StrugController::BUTTON_USE, 0);
-              break;
-            case VK_ESCAPE:
-              gameContext->getController()->buttonPress(StrugController::BUTTON_ESCAPE, 0);
-              break;
+      if (controller) {
+        if (rawInput->header.dwType == RIM_TYPEKEYBOARD) {
+          RAWKEYBOARD *keyboard = (RAWKEYBOARD*) &rawInput->data;
+          
+          // button is down
+          if (keyboard->Flags == RI_KEY_MAKE
+            || keyboard->Flags == RI_KEY_MAKE + RI_KEY_E0
+            || keyboard->Flags == RI_KEY_MAKE + RI_KEY_E1)
+          {
+            switch (keyboard->VKey) {
+              case VK_UP:
+                controller->buttonPress(StrugController::BUTTON_UP,    0);
+                break;
+              case VK_DOWN:
+                controller->buttonPress(StrugController::BUTTON_DOWN,  0);
+                break;
+              case VK_LEFT:
+                controller->buttonPress(StrugController::BUTTON_LEFT,  0);
+                break;
+              case VK_RIGHT:
+                controller->buttonPress(StrugController::BUTTON_RIGHT, 0);
+                break;
+              case VK_SPACE:
+                controller->buttonPress(StrugController::BUTTON_FIRE, 0);
+                break;
+              case VK_RETURN:
+                controller->buttonPress(StrugController::BUTTON_USE, 0);
+                break;
+              case VK_ESCAPE:
+                controller->buttonPress(StrugController::BUTTON_ESCAPE, 0);
+                break;
+            }
+            // button is up
+          } else if (keyboard->Flags == RI_KEY_BREAK
+            || keyboard->Flags == RI_KEY_BREAK + RI_KEY_E0
+            || keyboard->Flags == RI_KEY_BREAK + RI_KEY_E1)
+          {
+            switch (keyboard->VKey) {
+              case VK_UP:
+                controller->buttonRelease(StrugController::BUTTON_UP,    0);
+                break;
+              case VK_DOWN:
+                controller->buttonRelease(StrugController::BUTTON_DOWN,  0);
+                break;
+              case VK_LEFT:
+                controller->buttonRelease(StrugController::BUTTON_LEFT,  0);
+                break;
+              case VK_RIGHT:
+                controller->buttonRelease(StrugController::BUTTON_RIGHT, 0);
+                break;
+              case VK_SPACE:
+                controller->buttonRelease(StrugController::BUTTON_FIRE,  0);
+                break;
+              case VK_RETURN:
+                controller->buttonRelease(StrugController::BUTTON_USE,   0);
+                break;
+              case VK_ESCAPE:
+                controller->buttonRelease(StrugController::BUTTON_ESCAPE,  0);
+                break;
+            }
           }
-          // button is up
-        } else if (keyboard->Flags == RI_KEY_BREAK
-          || keyboard->Flags == RI_KEY_BREAK + RI_KEY_E0
-          || keyboard->Flags == RI_KEY_BREAK + RI_KEY_E1)
-        {
-          switch (keyboard->VKey) {
-            case VK_UP:
-              gameContext->getController()->buttonRelease(StrugController::BUTTON_UP,    0);
-              break;
-            case VK_DOWN:
-              gameContext->getController()->buttonRelease(StrugController::BUTTON_DOWN,  0);
-              break;
-            case VK_LEFT:
-              gameContext->getController()->buttonRelease(StrugController::BUTTON_LEFT,  0);
-              break;
-            case VK_RIGHT:
-              gameContext->getController()->buttonRelease(StrugController::BUTTON_RIGHT, 0);
-              break;
-            case VK_SPACE:
-              gameContext->getController()->buttonRelease(StrugController::BUTTON_FIRE,  0);
-              break;
-            case VK_RETURN:
-              gameContext->getController()->buttonRelease(StrugController::BUTTON_USE,   0);
-              break;
-            case VK_ESCAPE:
-              gameContext->getController()->buttonRelease(StrugController::BUTTON_ESCAPE,  0);
-              break;
-          }
+        } else if (rawInput->header.dwType == RIM_TYPEMOUSE) {
+          
         }
-      } else if (rawInput->header.dwType == RIM_TYPEMOUSE) {
-        
-      } 
-
+      } else {
+        log("Warning: no virtual controller in the game context. You can use stub controller to suppress this message");
+      }
+      
       delete[] lpb; 
     
       int defProcResult = DefRawInputProc(&rawInput, 1, sizeof(RAWINPUTHEADER));
@@ -215,6 +220,12 @@ int WINAPI WinMain(HINSTANCE hInstance,
       return 1;
   }
   
+  RECT viewportRect = {0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT};
+  
+  if (!::AdjustWindowRect(&viewportRect, WS_OVERLAPPEDWINDOW, false)) {
+    log("Warning: Could not adjust window rectangle, error: %d", ::GetLastError());
+  }
+  
   // The parameters to CreateWindow explained:
   // szWindowClass: the name of the application
   // szTitle: the text that appears in the title bar
@@ -230,7 +241,8 @@ int WINAPI WinMain(HINSTANCE hInstance,
       szTitle,
       WS_OVERLAPPEDWINDOW,
       CW_USEDEFAULT, CW_USEDEFAULT,
-      SCREEN_WIDTH, SCREEN_HEIGHT,
+      viewportRect.right - viewportRect.left,
+      viewportRect.bottom - viewportRect.top,
       NULL,
       NULL,
       hInstance,
@@ -305,6 +317,8 @@ int WINAPI WinMain(HINSTANCE hInstance,
   // Uncomment to see OpenGL version at launch
   //MessageBox(0,(TCHAR*)glGetString(GL_VERSION), "OPENGL VERSION",0);
   
+  log("OpenGL version: %s", glGetString(GL_VERSION));
+  
   // load necessary OpenGL extensions and function pointers
   loadFunctions();
   // also, re-create OpenGL context using pixel format extensions if necessary
@@ -345,15 +359,12 @@ int WINAPI WinMain(HINSTANCE hInstance,
   // Create game context and renderer
   GladeRenderer renderer;
   renderer.onSurfaceCreated();
-  renderer.onSurfaceChanged(SCREEN_WIDTH, SCREEN_HEIGHT);
+  renderer.onSurfaceChanged(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
   gameContext = new Context(&renderer);
   StandardDrawFrameHook hook(*gameContext);
   renderer.addDrawFrameHook(hook);
-  
-  LevelInfo levelInfo;
-  levelInfo.path = "1.gcsv";
-  levelInfo.title = "Foo";
-  gameContext->requestStateChange(std::unique_ptr<State>(new Play(levelInfo)));
+
+  gameContext->requestStateChange(std::unique_ptr<State>(new Play()));
   
   // The parameters to ShowWindow explained:
   // hWnd: the value returned from CreateWindow

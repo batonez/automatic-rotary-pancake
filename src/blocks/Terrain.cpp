@@ -34,6 +34,8 @@ void Terrain::initialize(const std::string &texture_pack_name, float block_width
         "textured.fragment.glsl"
       );
     
+    log("INITIALIZING");
+    
     baseView = new Drawable(Rectangle::INSTANCE, program);
     baseView->setTexture(game_resource_manager->getTexture(texture_pack_name, "burnable.png", ""));
     addDrawable(baseView);

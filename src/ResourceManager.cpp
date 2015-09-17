@@ -167,6 +167,10 @@ namespace Strug
   {
     Vector2i frameSize;
     
+    
+    Path bar = TEXTURES_SUBDIRECTORY + texture_pack_name + texture_data_filename;
+    log("TEXDATA: %s", bar.toString().c_str());
+    
     if (texture_data_filename.toString().length()) {
       // FIXME! Since we are loading texture data file without Glade resource manager, we should cache it here
       std::ifstream textureInfoStream;
@@ -192,6 +196,10 @@ namespace Strug
     }
     
     std::shared_ptr<Texture> result;
+    
+    
+    Path foo = TEXTURES_SUBDIRECTORY + texture_pack_name + image_filename;
+    log("TEX: %s", foo.toString().c_str());
     
     try {
       result = Glade::ResourceManager::getTexture(TEXTURES_SUBDIRECTORY + texture_pack_name + image_filename, frameSize.x, frameSize.y);

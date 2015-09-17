@@ -5,5 +5,5 @@
 class WorldGenerator
 {
   public:
-    Area *fillArea(Area *area);
+    void fillArea(Area *area);
 };
