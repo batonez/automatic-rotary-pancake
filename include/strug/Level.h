@@ -62,5 +62,5 @@ class Level
 
 typedef Level Area;
 
-// FIXME Should be hash table!!
+// FIXME Maybe it should be hash table?
 typedef std::map< std::pair<int, int>, Area* > AreaMap;

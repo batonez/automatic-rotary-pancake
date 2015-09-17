@@ -1,3 +1,4 @@
+#include <glade/debug/log.h>
 #include <glade/math/Vector.h>
 #include <strug/exception/StrugException.h>
 #include <strug/Level.h>
@@ -40,6 +41,7 @@ Level::~Level()
   
     while (block != cell->second.end()) {
       delete *block;
+      ++block;
     }
     
     ++cell;

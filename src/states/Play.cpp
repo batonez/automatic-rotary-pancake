@@ -178,6 +178,7 @@ void Play::applyRules(Context &context)
       || playerAreaCoordY != prevPlayerAreaCoordY;
     
     if (playerMovedToAnotherArea) {
+      removeFarAreas(context, playerAreaCoordX, playerAreaCoordY);
       addMoreAreas(context, playerAreaCoordX, playerAreaCoordY);
       
       prevPlayerAreaCoordX = playerAreaCoordX;
@@ -217,6 +218,39 @@ void Play::addMoreAreas(Context &context, int area_x, int area_y)
       }
     }
   }
+}
+
+void Play::removeFarAreas(Context &context, int player_area_x, int player_area_y)
+{
+  AreaMap::iterator i;
+  log("=== player is at (%d, %d)", player_area_x, player_area_y);
+  log("=== total areas %d", areaMap.size());
+  log("====== CURRENT AREAS ====");
+  
+  for (i = areaMap.begin(); i != areaMap.end(); ++i) {
+    std::pair<int,int> areaCoords = i->first;
+    log("(%d, %d)", areaCoords.first, areaCoords.second);
+    
+    if (areaCoords.first != player_area_x || areaCoords.second != player_area_y) {
+      Area *area = i->second;
+      
+      for (int x = 0; x < area->getWidthInBlocks(); ++x) {
+        for (int y = 0; y < area->getHeightInBlocks(); ++y) {
+          Level::Blocks *blocksInThisCell = area->getObjectsAt(x, y);
+          Level::Blocks::iterator block;
+          
+          for (block = blocksInThisCell->begin(); block != blocksInThisCell->end(); ++block) {
+            context.remove(*block);
+          }
+        }
+      }
+     
+      areaMap.erase(i);
+      delete area;
+    }
+  }
+  
+  log("====== END CURRENT AREAS ======");
 }
 
 void Play::addArea(Context &context, int area_x, int area_y, MazeGenerator::CellType type)
