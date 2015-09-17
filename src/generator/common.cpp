@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <assert.h>
 
 #include <glade/debug/log.h>
 
@@ -43,6 +44,22 @@ void fill_stripe(
 }
 
 
+static inline void ensure_steepness_sanity(Vector2i &result)
+{
+  assert(!(result.x < 0 && result.y < 0));
+  
+  if (result.x < 0 && -result.x > result.y) {
+    log("S Warning: steepness is %d %d, making it sane", result.x, result.y);
+    result.x = -result.y;
+  }
+  
+  if (result.y < 0 && -result.y > result.x) {
+    log("S Warning: steepness is %d %d, making it sane", result.x, result.y);
+    result.y = -result.y;
+  }
+}
+
+
 Vector2i get_constrained_steepness(
   int  area_width,
   int  min_height_this_col,
@@ -56,14 +73,15 @@ Vector2i get_constrained_steepness(
   Vector2i result(max_steepness, max_steepness);
   log("S %d %d", result.x, result.y);
   
-  // Cannot let the passage be taller than max passage height  
-  result.x = std::min<int>(not_negative(from_height - min_height_this_col), result.x);  
+  // Cannot let the passage be taller than max passage height
+  result.x = std::min<int>(from_height - min_height_this_col, result.x);  
   // Exclude corner blocking
-  result.y = std::min<int>(not_negative(max_height_this_col - from_height), result.y);
-  
-  log("S %d %d", result.x, result.y);
+  result.y = std::min<int>(max_height_this_col - from_height, result.y);
   
   if (!from_height || !to_height) {
+    log("S No destination height/width, so won't alter steepness any more");
+    ensure_steepness_sanity(result);
+    log("S %d %d", result.x, result.y);
     return result;
   }
   
@@ -80,8 +98,8 @@ Vector2i get_constrained_steepness(
   
   log("S maxFinalHeight = %d = %d + %d * %d", maxFinalHeight, from_height, colsLeft, max_steepness);
   log("S minFinalHeight = %d = %d - %d * %d", minFinalHeight, from_height, colsLeft, max_steepness);
-  log("S maxRequiredFinalHeight = %d = %d + %d", maxRequiredFinalHeight, to_height, max_steepness);
-  log("S minRequiredFinalHeight = %d = %d - %d", minRequiredFinalHeight, to_height, max_steepness);
+  log("S maxRequiredFinalHeight = %d = %d + %d", maxRequiredFinalHeight, to_height, max_steepness); // fixme but not greater than area height
+  log("S minRequiredFinalHeight = %d = %d - %d", minRequiredFinalHeight, to_height, max_steepness); // fixme but not less than zero
   
   if (maxFinalHeight <=  maxRequiredFinalHeight) {
     log("S Forcing steepness up");
@@ -91,8 +109,7 @@ Vector2i get_constrained_steepness(
     result.y = -result.x;
   }
   
-  log("S %d %d", result.x, result.y);
-  
+  ensure_steepness_sanity(result);
   log("S %d %d", result.x, result.y);
   
   return result;

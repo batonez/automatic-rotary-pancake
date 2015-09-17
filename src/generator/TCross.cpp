@@ -55,7 +55,7 @@ void TCross::calculatePassageTurnStripe(
     
       log("Bottom terrain min height: %d, Max height: %d", minHeightThisCol, maxHeightThisCol);
     
-      bottomSteepness = get_constrained_steepness(to_right_width, minHeightThisCol, maxHeightThisCol, oldBottomHeight, to_bottom_terrain_height, current_stripe_number, max_bottom_steepness);
+      bottomSteepness = get_constrained_steepness(area_width, minHeightThisCol, maxHeightThisCol, oldBottomHeight, to_bottom_terrain_height, current_stripe_number, max_bottom_steepness);
     }
     
     bottom_terrain_height = 
@@ -72,7 +72,7 @@ void TCross::calculatePassageTurnStripe(
   maxHeightThisCol = std::min<int>(
     // corner blocking with the left neighbor col
     area_height - oldBottomHeight - min_passage_thickness, 
-    spaceLeft - min_passage_thickness
+    spaceLeft - min_passage_thickness - 1
   );
 
   // corner blocking with the right neighbor col
@@ -80,8 +80,16 @@ void TCross::calculatePassageTurnStripe(
     maxHeightThisCol = std::min<int>(area_height - to_bottom_terrain_height - min_passage_thickness, maxHeightThisCol);
   }
   
-  int minHeightThisCol = std::max<int>(spaceLeft - max_passage_thickness, 1);
-
+  int minHeightThisCol;
+  
+ // do not constrain min height for blind side of the cross, so more interesting variations are possible, and more room may be created at the cross
+ // Drawback: sometimes final passage will be much taller than max passage height and it will cause big steepness leap on the edge of areas
+ // if (spaceLeft >= area_height) {
+    minHeightThisCol = 1; 
+ // } else {
+ //   minHeightThisCol = std::max<int>(spaceLeft - max_passage_thickness, 1);
+ // }
+  
   log("Top terrain min height: %d, Max height: %d", minHeightThisCol, maxHeightThisCol);
   
   // generating top terrain
@@ -177,15 +185,15 @@ void TCross::createPassageTurn(
   if (!transpose && !invert_x && !invert_y) {
     area->intAttributes["left_exit_top_terrain_height"]    = topTerrainHeight;
     area->intAttributes["left_exit_bottom_terrain_height"] = bottomTerrainHeight;
-  } else if (invert_y) {
+  } else if (!transpose && invert_y) {
     area->intAttributes["left_exit_top_terrain_height"]    = bottomTerrainHeight;
     area->intAttributes["left_exit_bottom_terrain_height"] = topTerrainHeight;
-  } else if (invert_x) {
-    area->intAttributes["right_exit_top_terrain_height"]  = topTerrainHeight;
-    area->intAttributes["right_exit_bottom_terrain_height"] = bottomTerrainHeight;
+  } else if (transpose && invert_y) {
+    area->intAttributes["top_exit_right_terrain_width"]  = topTerrainHeight;
+    area->intAttributes["top_exit_left_terrain_width"] = bottomTerrainHeight;
   } else if (transpose) {
+    area->intAttributes["top_exit_left_terrain_width"]   = topTerrainHeight;
     area->intAttributes["top_exit_right_terrain_width"]  = bottomTerrainHeight;
-    area->intAttributes["top_exit_left_terrain_width"] = topTerrainHeight;
   }
   
   // generating the rest of the columns
@@ -211,16 +219,24 @@ void TCross::createPassageTurn(
   }
   
   if (!transpose && !invert_x && !invert_y) {
-    area->intAttributes["bottom_exit_right_terrain_width"] = to_right_width;
-    area->intAttributes["bottom_exit_left_terrain_width"]  = to_left_width;
-  } else if (invert_x) {
-    area->intAttributes["bottom_exit_right_terrain_width"] = to_left_width;
-    area->intAttributes["bottom_exit_left_terrain_width"]  = to_right_width;
-  } else if (invert_y) {
-    area->intAttributes["top_exit_right_terrain_width"]  = to_right_width;
-    area->intAttributes["top_exit_left_terrain_width"]   = to_left_width;
+    area->intAttributes["bottom_exit_right_terrain_width"]  = to_right_width;
+    area->intAttributes["bottom_exit_left_terrain_width"]   = to_left_width;
+    area->intAttributes["right_exit_top_terrain_height"]    = topTerrainHeight;
+    area->intAttributes["right_exit_bottom_terrain_height"] = bottomTerrainHeight;
+  } else if (!transpose && invert_y) {
+    area->intAttributes["top_exit_right_terrain_width"]     = to_right_width;
+    area->intAttributes["top_exit_left_terrain_width"]      = to_left_width;
+    area->intAttributes["right_exit_top_terrain_height"]    = bottomTerrainHeight;
+    area->intAttributes["right_exit_bottom_terrain_height"] = topTerrainHeight;
+  } else if (transpose && invert_y) {
+    area->intAttributes["left_exit_top_terrain_height"]    = to_left_width;
+    area->intAttributes["left_exit_bottom_terrain_height"] = to_right_width;
+    area->intAttributes["bottom_exit_right_terrain_width"] = topTerrainHeight;
+    area->intAttributes["bottom_exit_left_terrain_width"]  = bottomTerrainHeight;
   } else if (transpose) {
-    area->intAttributes["right_exit_top_terrain_height"]    = to_left_width;
+    area->intAttributes["bottom_exit_left_terrain_width"]   = topTerrainHeight;
+    area->intAttributes["bottom_exit_right_terrain_width"]  = bottomTerrainHeight;
     area->intAttributes["right_exit_bottom_terrain_height"] = to_right_width;
+    area->intAttributes["right_exit_top_terrain_height"]    = to_left_width;
   }
 }

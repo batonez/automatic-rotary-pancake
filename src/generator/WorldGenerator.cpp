@@ -12,6 +12,7 @@
 #include <strug/generator/StraightPassage.h>
 #include <strug/generator/PassageTurn.h>
 #include <strug/generator/TCross.h>
+#include <strug/generator/XCross.h>
 
 WorldGenerator::WorldGenerator(long seed_param)
 {
@@ -37,38 +38,38 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
   Area *adjancentTop    = NULL;
   Area *adjancentBottom = NULL;
 
-  int fromTopTerrainHeight    = 0;
-  int fromBottomTerrainHeight = 0;
-  int toTopTerrainHeight      = 0;
-  int toBottomTerrainHeight   = 0;
+  int leftNeighborTopHeight    = 0;
+  int leftNeighborBottomHeight = 0;
+  int rightNeighborTopHeight      = 0;
+  int rightNeighborBottomHeight   = 0;
 
-  int fromLeftTerrainWidth    = 0;
-  int fromRightTerrainWidth   = 0;
-  int toLeftTerrainWidth      = 0;
-  int toRightTerrainWidth     = 0;
+  int bottomNeighborLeftWidth    = 0;
+  int bottomNeighborRightWidth   = 0;
+  int topNeighborLeftWidth      = 0;
+  int topNeighborRightWidth     = 0;
  
   try {
     adjancentLeft = map.at(std::pair<int,int>(area_x - 1, area_y));
-    fromTopTerrainHeight = adjancentLeft->intAttributes.at("right_exit_top_terrain_height");
-    fromBottomTerrainHeight = adjancentLeft->intAttributes.at("right_exit_bottom_terrain_height");
+    leftNeighborTopHeight = adjancentLeft->intAttributes.at("right_exit_top_terrain_height");
+    leftNeighborBottomHeight = adjancentLeft->intAttributes.at("right_exit_bottom_terrain_height");
   } catch (std::out_of_range &e) {}
   
   try {
     adjancentRight = map.at(std::pair<int,int>(area_x + 1, area_y));
-    toTopTerrainHeight = adjancentRight->intAttributes.at("left_exit_top_terrain_height");
-    toBottomTerrainHeight = adjancentRight->intAttributes.at("left_exit_bottom_terrain_height");
+    rightNeighborTopHeight = adjancentRight->intAttributes.at("left_exit_top_terrain_height");
+    rightNeighborBottomHeight = adjancentRight->intAttributes.at("left_exit_bottom_terrain_height");
   } catch (std::out_of_range &e) {}
 
   try {
     adjancentTop = map.at(std::pair<int,int>(area_x, area_y - 1));
-    toLeftTerrainWidth = adjancentTop->intAttributes.at("bottom_exit_left_terrain_width");
-    toRightTerrainWidth = adjancentTop->intAttributes.at("bottom_exit_right_terrain_width");
+    topNeighborLeftWidth = adjancentTop->intAttributes.at("bottom_exit_left_terrain_width");
+    topNeighborRightWidth = adjancentTop->intAttributes.at("bottom_exit_right_terrain_width");
   } catch (std::out_of_range &e) {}
   
   try {
     adjancentBottom = map.at(std::pair<int,int>(area_x, area_y + 1));
-    fromLeftTerrainWidth = adjancentBottom->intAttributes.at("top_exit_left_terrain_width");
-    fromRightTerrainWidth = adjancentBottom->intAttributes.at("top_exit_right_terrain_width");
+    bottomNeighborLeftWidth = adjancentBottom->intAttributes.at("top_exit_left_terrain_width");
+    bottomNeighborRightWidth = adjancentBottom->intAttributes.at("top_exit_right_terrain_width");
   } catch (std::out_of_range &e) {}
 
   switch (type)
@@ -79,10 +80,10 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
         true,
         area->getHeightInBlocks() / 2,
         3,
-        fromTopTerrainHeight,
-        fromBottomTerrainHeight,
-        toTopTerrainHeight,
-        toBottomTerrainHeight
+        leftNeighborTopHeight,
+        leftNeighborBottomHeight,
+        rightNeighborTopHeight,
+        rightNeighborBottomHeight
       );
       break;
     case PASSAGE_VERTICAL:
@@ -91,10 +92,10 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
         false,
         area->getHeightInBlocks() / 2,
         3,
-        fromLeftTerrainWidth,
-        fromRightTerrainWidth,
-        toLeftTerrainWidth,
-        toRightTerrainWidth
+        bottomNeighborLeftWidth,
+        bottomNeighborRightWidth,
+        topNeighborLeftWidth,
+        topNeighborRightWidth
       );
       break;
     case PASSAGE_LEFT_TO_BOTTOM:
@@ -106,10 +107,10 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
         false,
         area->getHeightInBlocks() / 2,
         3,
-        fromTopTerrainHeight,
-        fromBottomTerrainHeight,
-        fromLeftTerrainWidth,
-        fromRightTerrainWidth
+        leftNeighborTopHeight,
+        leftNeighborBottomHeight,
+        bottomNeighborLeftWidth,
+        bottomNeighborRightWidth
       );
       break;
     case PASSAGE_LEFT_TO_TOP:
@@ -121,10 +122,10 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
         true,
         area->getHeightInBlocks() / 2,
         3,
-        fromTopTerrainHeight,
-        fromBottomTerrainHeight,
-        toLeftTerrainWidth,
-        toRightTerrainWidth
+        leftNeighborTopHeight,
+        leftNeighborBottomHeight,
+        topNeighborLeftWidth,
+        topNeighborRightWidth
       );
       break;
     case PASSAGE_BOTTOM_TO_RIGHT:
@@ -136,10 +137,10 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
         false,
         area->getHeightInBlocks() / 2,
         3,
-        toTopTerrainHeight,
-        toBottomTerrainHeight,
-        fromRightTerrainWidth,
-        fromLeftTerrainWidth
+        rightNeighborTopHeight,
+        rightNeighborBottomHeight,
+        bottomNeighborRightWidth,
+        bottomNeighborLeftWidth
       );
       break;
     case PASSAGE_TOP_TO_RIGHT:
@@ -151,10 +152,10 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
         false,
         area->getHeightInBlocks() / 2,
         3,
-        toLeftTerrainWidth,
-        toRightTerrainWidth,
-        toTopTerrainHeight,
-        toBottomTerrainHeight
+        topNeighborLeftWidth,
+        topNeighborRightWidth,
+        rightNeighborTopHeight,
+        rightNeighborBottomHeight
       );
       break;
     case PASSAGE_TCROSS_BLIND_TOP:
@@ -165,12 +166,75 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
         false,
         area->getHeightInBlocks() / 2,
         3,
-        fromTopTerrainHeight,
-        fromBottomTerrainHeight,
-        toTopTerrainHeight,
-        toBottomTerrainHeight,
-        fromLeftTerrainWidth,
-        fromRightTerrainWidth
+        leftNeighborTopHeight,
+        leftNeighborBottomHeight,
+        rightNeighborTopHeight,
+        rightNeighborBottomHeight,
+        bottomNeighborLeftWidth,
+        bottomNeighborRightWidth
+      );
+      break;
+    case PASSAGE_TCROSS_BLIND_BOTTOM:
+      TCross::createPassageTurn(
+        area,
+        false,
+        false,
+        true,
+        area->getHeightInBlocks() / 2,
+        3,
+        leftNeighborTopHeight,
+        leftNeighborBottomHeight,
+        rightNeighborBottomHeight,
+        rightNeighborTopHeight,
+        topNeighborLeftWidth,
+        topNeighborRightWidth
+      );
+      break;
+    case PASSAGE_TCROSS_BLIND_RIGHT:
+      TCross::createPassageTurn(
+        area,
+        true,
+        false,
+        true,
+        area->getHeightInBlocks() / 2,
+        3,
+        topNeighborLeftWidth,
+        topNeighborRightWidth,
+        bottomNeighborRightWidth,
+        bottomNeighborLeftWidth,
+        leftNeighborTopHeight,
+        leftNeighborBottomHeight
+      );
+      break;
+    case PASSAGE_TCROSS_BLIND_LEFT:
+      TCross::createPassageTurn(
+        area,
+        true,
+        false,
+        false,
+        area->getHeightInBlocks() / 2,
+        3,
+        topNeighborLeftWidth,
+        topNeighborRightWidth,
+        bottomNeighborLeftWidth,
+        bottomNeighborRightWidth,
+        rightNeighborTopHeight,
+        rightNeighborBottomHeight
+      );
+      break;
+    case PASSAGE_XCROSS:
+      XCross::createPassageTurn(
+        area,
+        area->getHeightInBlocks() / 2,
+        3,
+        leftNeighborTopHeight,
+        leftNeighborBottomHeight,
+        rightNeighborTopHeight,
+        rightNeighborBottomHeight,
+        bottomNeighborLeftWidth,
+        bottomNeighborRightWidth,
+        topNeighborLeftWidth,
+        topNeighborRightWidth
       );
       break;
     default:

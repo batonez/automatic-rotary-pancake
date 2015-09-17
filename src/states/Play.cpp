@@ -10,7 +10,7 @@
 
 extern Strug::ResourceManager *game_resource_manager;
 
-const float Play::BASE_RUNNING_SPEED = 0.2f;
+const float Play::BASE_RUNNING_SPEED = 0.5f;
 
 class CharacterController: public StrugController
 {
@@ -146,11 +146,11 @@ void Play::init(Context &context)
   addArea(context, 0, 0, WorldGenerator::PASSAGE_HORIZONTAL);
   addArea(context, 1, -1, WorldGenerator::PASSAGE_VERTICAL);
   addArea(context, 1, 0, WorldGenerator::PASSAGE_LEFT_TO_TOP);
-  
+ 
   addArea(context, 0, 0, WorldGenerator::PASSAGE_VERTICAL);
   addArea(context, 1, 1, WorldGenerator::PASSAGE_HORIZONTAL);
   addArea(context, 0, 1, WorldGenerator::PASSAGE_TOP_TO_RIGHT);
-
+ 
   addArea(context, 1, 0, WorldGenerator::PASSAGE_HORIZONTAL);
   addArea(context, 0, 1, WorldGenerator::PASSAGE_VERTICAL);
   addArea(context, 0, 0, WorldGenerator::PASSAGE_BOTTOM_TO_RIGHT);
@@ -174,9 +174,37 @@ void Play::init(Context &context)
 */ 
 
   // Т-образные
+  /*
+  addArea(context, 1, 0, WorldGenerator::PASSAGE_HORIZONTAL);
+  addArea(context, -1, 0, WorldGenerator::PASSAGE_HORIZONTAL);
+  addArea(context, 0, 1, WorldGenerator::PASSAGE_VERTICAL);
   addArea(context, 0, 0, WorldGenerator::PASSAGE_TCROSS_BLIND_TOP);
-  
 
+  addArea(context, 1, 0, WorldGenerator::PASSAGE_HORIZONTAL);
+  addArea(context, -1, 0, WorldGenerator::PASSAGE_HORIZONTAL);
+  addArea(context, 0, -1, WorldGenerator::PASSAGE_VERTICAL);
+  addArea(context, 0, 0, WorldGenerator::PASSAGE_TCROSS_BLIND_BOTTOM);
+
+  addArea(context, -1,  0, WorldGenerator::PASSAGE_HORIZONTAL);
+  addArea(context,  0,  1, WorldGenerator::PASSAGE_VERTICAL);
+  addArea(context,  0, -1, WorldGenerator::PASSAGE_VERTICAL);
+  addArea(context,  0,  0, WorldGenerator::PASSAGE_TCROSS_BLIND_RIGHT);
+  
+  addArea(context,  1,  0, WorldGenerator::PASSAGE_HORIZONTAL);
+  addArea(context,  0,  1, WorldGenerator::PASSAGE_VERTICAL);
+  addArea(context,  0, -1, WorldGenerator::PASSAGE_VERTICAL);
+  addArea(context,  0,  0, WorldGenerator::PASSAGE_TCROSS_BLIND_LEFT);
+*/
+
+  // Крестообразный
+  
+  
+  addArea(context,   1,  0, WorldGenerator::PASSAGE_HORIZONTAL);
+  addArea(context,  -1,  0, WorldGenerator::PASSAGE_HORIZONTAL);
+  addArea(context,   0,  1, WorldGenerator::PASSAGE_VERTICAL);
+  addArea(context,   0, -1, WorldGenerator::PASSAGE_VERTICAL);
+  addArea(context,   0,  0, WorldGenerator::PASSAGE_XCROSS);
+  
   // Setup controls
   controller = new CharacterController(context, *this);
   context.setController(*controller);
