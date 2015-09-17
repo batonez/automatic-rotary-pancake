@@ -11,7 +11,7 @@
 extern Strug::ResourceManager *game_resource_manager;
 
 const float Play::BASE_RUNNING_SPEED = 0.2f;
-const int   Play::AREA_WIDTH_BLOCKS = 10;
+const int   Play::AREA_WIDTH_BLOCKS = 16;
 
 class CharacterController: public StrugController
 {
@@ -86,7 +86,8 @@ Play::Play():
   screenScaleX(0),
   screenScaleY(0),
   controller(NULL),
-  player(NULL)
+  player(NULL),
+  generator(1438337493)
 {}
 
 Play::~Play()
@@ -102,10 +103,14 @@ void Play::init(Context &context)
   screenScaleX = context.renderer->getViewportWidthCoords()  / 2;
   screenScaleY = context.renderer->getViewportHeightCoords() / 2;
   
-  blockWidth = blockHeight = min(
-    context.renderer->getViewportWidthCoords()  / AREA_WIDTH_BLOCKS,
-    context.renderer->getViewportHeightCoords() / AREA_WIDTH_BLOCKS
-  );
+  //blockWidth = blockHeight = min(
+  //  context.renderer->getViewportWidthCoords()  / AREA_WIDTH_BLOCKS,
+  //  context.renderer->getViewportHeightCoords() / AREA_WIDTH_BLOCKS
+  //);
+  
+  blockWidth = blockHeight = 0.1f;
+  
+  log("BLOCK SIZE: %3.3f, %3.3f", blockWidth, blockHeight);
   
   // set actual speeds
   runningSpeed = BASE_RUNNING_SPEED * blockWidth;
@@ -176,7 +181,6 @@ void Play::applyRules(Context &context)
     || playerBlockCoordY != prevPlayerBlockCoordY;
   
   if (playerMovedToAnotherCell) {
-    log("CELL CHANGE");
     int playerAreaCoordX  = areaCoordFromBlockCoord(playerBlockCoordX);
     int playerAreaCoordY  = areaCoordFromBlockCoord(playerBlockCoordY);
     
@@ -185,7 +189,6 @@ void Play::applyRules(Context &context)
       || playerAreaCoordY != prevPlayerAreaCoordY;
     
     if (playerMovedToAnotherArea) {
-      log("AREA CHANGE");
       addMoreAreas(context, playerAreaCoordX, playerAreaCoordY);
       
       prevPlayerAreaCoordX = playerAreaCoordX;
