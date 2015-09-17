@@ -120,10 +120,10 @@ void Play::init(Context &context)
   // set actual speeds
   runningSpeed = BASE_RUNNING_SPEED * blockWidth;
   
-  mazeGenerator.createMaze();
+  generator.mazeGenerator.createMaze();
 
   std::pair<int,int> exitCoords =
-    mazeGenerator.getExit(::rand() % mazeGenerator.getNumberOfExits());
+    generator.mazeGenerator.getExit(::rand() % generator.mazeGenerator.getNumberOfExits());
   log("Spawn player at exit (area coords): %d, %d", exitCoords.first, exitCoords.second);
     
   // Create and initialize the player
@@ -201,7 +201,7 @@ void Play::addMoreAreas(Context &context, int area_x, int area_y)
   for (int i = areaXFrom; i <= areaXTo; ++i) {
     for (int j = areaYFrom; j <= areaYTo; ++j) {
       if (!areaMap.count(std::pair<int,int>(i, j))) {
-        MazeGenerator::MazeCell cell = mazeGenerator.getCellAt(i, j);
+        MazeGenerator::MazeCell cell = generator.mazeGenerator.getCellAt(i, j);
         
         if (!cell.passable) {
           addArea(context, i, j, WorldGenerator::AREA_FULL);

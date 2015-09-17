@@ -4,7 +4,6 @@
 #include <glade/State.h>
 #include <glade/debug/log.h>
 #include <strug/Level.h>
-#include <strug/generator/MazeGenerator.h>
 #include <strug/generator/WorldGenerator.h>
 
 class Context;
@@ -25,7 +24,6 @@ class Play: public State
     Vector2i cameraMan;
     StrugController *controller;
     Player *player;
-    MazeGenerator mazeGenerator;
     WorldGenerator generator;
     AreaMap areaMap;
     

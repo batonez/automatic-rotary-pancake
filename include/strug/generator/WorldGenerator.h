@@ -1,6 +1,7 @@
 #pragma once
 
 #include <strug/Level.h>
+#include <strug/generator/MazeGenerator.h>
 
 class WorldGenerator
 {
@@ -25,6 +26,8 @@ class WorldGenerator
       PASSAGE_XCROSS
     };
     
+  MazeGenerator mazeGenerator;
+    
   private:
     long seed;
     
@@ -32,4 +35,5 @@ class WorldGenerator
     WorldGenerator(const long seed_param = 0);
     void setSeed(const long seed_param = 0);
     void fillArea(Area *area, AreaMap &map, int area_x, int area_y, AreaType type);
+    void createMaze();
 };

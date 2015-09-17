@@ -2,6 +2,7 @@
 #include <time.h>
 #include <algorithm>
 #include <assert.h>
+#include <limits.h>
 
 #include <glade/debug/log.h>
 #include <glade/math/vector.h>
@@ -18,6 +19,16 @@
 #define MIN_PASSAGE_HEIGHT 4
 #define MAX_PASSAGE_HEIGHT 14
 
+static unsigned int getCombinedSeed(long seed, int x, int y)
+{
+  log("INT MIN: %d, INT MAX: %d, UINT_MAX: %ud", INT_MIN, INT_MAX, UINT_MAX);
+  
+  long long foo = 429496734297;
+  int bar = (int) foo;
+  log ("LL TO INT: %d", bar);
+  return 0;
+}
+
 WorldGenerator::WorldGenerator(long seed_param)
 {
   setSeed(seed_param);
@@ -33,8 +44,16 @@ void WorldGenerator::setSeed(long seed_param)
   ::srand(seed);
 }
 
+void WorldGenerator::createMaze()
+{
+  ::srand(seed);
+  mazeGenerator.createMaze();
+}
+
 void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, AreaType type)
 {
+  /*::srand(*/getCombinedSeed(seed, area_x, area_y)/*)*/;
+  
   area->texturePackName = "cave";
 
   Area *adjancentLeft   = NULL;
@@ -47,11 +66,11 @@ void WorldGenerator::fillArea(Area *area, AreaMap &map, int area_x, int area_y, 
   int rightNeighborTopHeight      = 0;
   int rightNeighborBottomHeight   = 0;
 
-  int bottomNeighborLeftWidth    = 0;
-  int bottomNeighborRightWidth   = 0;
+  int bottomNeighborLeftWidth   = 0;
+  int bottomNeighborRightWidth  = 0;
   int topNeighborLeftWidth      = 0;
   int topNeighborRightWidth     = 0;
- 
+  
   try {
     adjancentLeft = map.at(std::pair<int,int>(area_x - 1, area_y));
     leftNeighborTopHeight = adjancentLeft->intAttributes.at("right_exit_top_terrain_height");
