@@ -43,6 +43,8 @@ class MazeTest: public State
   private:
     static const float BASE_RUNNING_SPEED;
     static const int   MAZE_WIDTH, MAZE_HEIGHT;
+    static const float BRAIDNESS;
+    static const int   MAX_EXIT_CARVE_ATTEMPTS;
     
     float runningSpeed;
     float blockWidth, blockHeight;
@@ -50,7 +52,13 @@ class MazeTest: public State
     Vector2i cameraMan;
     StrugController *controller;
     Player *player;
-    
+
+    bool
+      leftExitCarved,
+      rightExitCarved,
+      topExitCarved,
+      bottomExitCarved;
+      
     typedef std::map< std::pair<int, int>, MazeCell > MazeMap;
     typedef std::vector< std::pair<int,int> > VectorOfIntPairs;
     
@@ -104,6 +112,25 @@ class MazeTest: public State
         log("========== END CARVABLE CELLS ==========");
       }
       
+      // True example (X - this cell, O - carved cell, * - uncarved cell):
+      // ***
+      // OX*
+      // *O*
+      bool cellHasCheckerCarvedNeighbors(MazeCell &cell)
+      {
+        if (cell.passableStraightNeighborsNumber <= 1) {
+          return false;
+        }
+
+        if (cell.passableStraightNeighborsNumber > 2) {
+          return true;
+        }
+        
+        return ((cell.passableNeighbors & MazeTest::TOP_NEIGHBOR) && ((cell.passableNeighbors & MazeTest::BOTTOM_NEIGHBOR) == 0))
+          || ((cell.passableNeighbors & MazeTest::LEFT_NEIGHBOR) && ((cell.passableNeighbors & MazeTest::RIGHT_NEIGHBOR) == 0))
+          || ((cell.passableNeighbors & MazeTest::BOTTOM_NEIGHBOR) && (cell.passableNeighbors & MazeTest::RIGHT_NEIGHBOR));
+      }
+      
       int getBlockCoordX(Block &object);
       int getBlockCoordY(Block &object);
       int areaCoordFromBlockCoord(int blockCoord);
@@ -113,4 +140,6 @@ class MazeTest: public State
       MazeCell updateNeighborCell(int carved_cell_x, int carved_cell_y, int neighbor_cell_x, int neighbor_cell_y);
       void addToCarvableList(int cell_x, int cell_y);
       void removeFromCarvableList(int cell_x, int cell_y);
+      bool throwCoin(float probability = 0.5f); // move to separate module ("random")
+      void carveExit(int &exit_x, int &exit_y, int adj_x_offset, int adj_y_offset, int &random_coord, int dim);
 };

@@ -13,6 +13,8 @@ extern Strug::ResourceManager *game_resource_manager;
 const float MazeTest::BASE_RUNNING_SPEED = 0.5f;
 const int   MazeTest::MAZE_WIDTH  = 16;
 const int   MazeTest::MAZE_HEIGHT = 16;
+const float MazeTest::BRAIDNESS   = 0.0002f;
+const int   MazeTest::MAX_EXIT_CARVE_ATTEMPTS = 40;
 
 class MazeController: public StrugController
 {
@@ -94,7 +96,11 @@ MazeTest::MazeTest():
   screenScaleX(0),
   screenScaleY(0),
   controller(NULL),
-  player(NULL)
+  player(NULL),
+  topExitCarved(false),
+  bottomExitCarved(false),
+  leftExitCarved(false),
+  rightExitCarved(false)
 {}
 
 MazeTest::~MazeTest()
@@ -167,9 +173,16 @@ void MazeTest::createMaze()
   if (rand() % 2) {
     entranceX = rand() % 2 ? 0 : MAZE_WIDTH - 1;
     entranceY = rand() % (MAZE_HEIGHT - 2) + 1;
+    
+    rightExitCarved = (bool) entranceX;
+    leftExitCarved  = !rightExitCarved;
+    
   } else {
     entranceX = rand() % (MAZE_WIDTH - 2) + 1;
     entranceY = rand() % 2 ? 0 : MAZE_HEIGHT - 1;
+    
+    bottomExitCarved = (bool) entranceY;
+    topExitCarved    = !bottomExitCarved;
   }
   
   carvePassageAt(entranceX, entranceY);
@@ -186,6 +199,66 @@ void MazeTest::createMaze()
       carvableCells[whereToCarve].first,
       carvableCells[whereToCarve].second
     );
+  }
+
+  // Carving exits
+    
+  int exitX, exitY;
+  int adjXOffset, adjYOffset;
+  int dim;
+  
+  if (!leftExitCarved) {
+    exitX = 0;
+    adjXOffset = 1;
+    adjYOffset = 0;
+    int &randomCoord = exitY;  
+    dim = MAZE_HEIGHT;
+    carveExit(exitX, exitY, adjXOffset, adjYOffset, randomCoord, dim);
+  }
+    
+  if (!rightExitCarved) {
+    exitX = MAZE_WIDTH - 1;
+    adjXOffset = -1;
+    adjYOffset = 0;
+    int &randomCoord = exitY;  
+    dim = MAZE_HEIGHT;
+    carveExit(exitX, exitY, adjXOffset, adjYOffset, randomCoord, dim);
+  }
+    
+  if (!topExitCarved) {
+    exitY = 0;
+    adjXOffset = 0;
+    adjYOffset = 1;
+    int &randomCoord = exitX;  
+    dim = MAZE_WIDTH;
+    carveExit(exitX, exitY, adjXOffset, adjYOffset, randomCoord, dim);
+  }
+    
+  if (!bottomExitCarved) {
+    exitY = MAZE_HEIGHT - 1;
+    adjXOffset = 0;
+    adjYOffset = -1;
+    int &randomCoord = exitX;  
+    dim = MAZE_WIDTH;
+    carveExit(exitX, exitY, adjXOffset, adjYOffset, randomCoord, dim);
+  }
+}
+
+void MazeTest::carveExit(int &exit_x, int &exit_y, int adj_x_offset, int adj_y_offset, int &random_coord, int dim)
+{
+  for (int i = 0; i < MAX_EXIT_CARVE_ATTEMPTS; ++i) {
+    random_coord = ::rand() % (dim - 1) + 1;
+    
+    MazeCell cell = {0};
+    
+    try {
+      cell = mazeMap.at(std::pair<int,int>(exit_x + adj_x_offset, exit_y + adj_y_offset));
+    } catch (std::out_of_range &e) {}
+ 
+    if (cell.passable) {
+      carvePassageAt(exit_x, exit_y);
+      break;
+    }
   }
 }
 
@@ -231,7 +304,7 @@ void MazeTest::carvePassageAt(int cell_x, int cell_y)
       MazeCell neighbor = updateNeighborCell(cell_x, cell_y, i, j);
       
       // Cells that have more than one straight neighbors are not carvable
-      if (neighbor.passableStraightNeighborsNumber == 2) {
+      if (cellHasCheckerCarvedNeighbors(neighbor) || (neighbor.passableStraightNeighborsNumber == 2 && !throwCoin(BRAIDNESS))) {
         removeFromCarvableList(i, j);
         continue;
       }
@@ -278,13 +351,19 @@ void MazeTest::carvePassageAt(int cell_x, int cell_y)
       }
       
       // Cells that have exactly one straight neighbor and are not on the edge of the maze are carvable
-      if (neighbor.passableStraightNeighborsNumber == 1 && !isEdgeCell(i, j) && !neighbor.passable) {
+      if (neighbor.passableStraightNeighborsNumber <= 2 && !isEdgeCell(i, j) && !neighbor.passable) {
         addToCarvableList(i, j);
       }
     }
   }
   
   mazeMap[std::pair<int,int>(cell_x, cell_y)] = carvedCell;
+}
+
+// parameter is the probability of returning true
+bool MazeTest::throwCoin(float probability)
+{
+  return (::rand() % 100) < ::round(probability * 100);
 }
 
 void MazeTest::addToCarvableList(int cell_x, int cell_y)
