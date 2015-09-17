@@ -56,6 +56,7 @@ os.path.join(os.environ['HATCHERY_BUILDS'], 'lodepng', '*.obj'),
 ]
 
 ######################## Run
+baker.sanitizeBakeInput()
 baker.compile()
 baker.linkExe()
 

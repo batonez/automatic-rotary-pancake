@@ -7,7 +7,7 @@ Level::Level(int width_param, int height_param):
   width(0), height(0)
 {
   if (width_param < 0 || height_param < 0) {
-    throw StrugException("Width and Height of the block level should be positive integer");
+    throw StrugException("Width and height of the block level should be positive integer");
   }
   
   width  = width_param;
