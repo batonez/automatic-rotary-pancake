@@ -123,14 +123,14 @@ void Play::addArea(Context &context, int area_x, int area_y)
   generator.fillArea(area);
   
   // initializing blocks and their game mechanics
-  for (int blockX = 0; blockX < area->getWidthInBlocks(); ++blockX) {
-    for (int blockY = 0; blockY < area->getHeightInBlocks(); ++blockY) {
-      Level::Blocks *blocksInThisCell = area->getObjectsAt(blockX, blockY);
+  for (int i = 0; i < area->getWidthInBlocks(); ++i) {
+    for (int j = 0; j < area->getHeightInBlocks(); ++j) {
+      Level::Blocks *blocksInThisCell = area->getObjectsAt(i, j);
       Level::Blocks::iterator block;
       
       for (block = blocksInThisCell->begin(); block != blocksInThisCell->end(); ++block) {
         (*block)->initialize(area->texturePackName, blockWidth, blockHeight);
-        applyStartingRulesForBlock(**block, blockX * area_x, blockY * area_y);
+        applyStartingRulesForBlock(**block, (i+1) * area_x, (j+1) * area_y);
         context.add(*block);
       }
     }
@@ -159,8 +159,8 @@ void Play::applyRules(Context &context)
   int playerBlockCoordX = getBlockCoordX(*player);
   int playerBlockCoordY = getBlockCoordY(*player);
   
-  //log("%d, %d", areaCoordFromBlockCoord(playerBlockCoordX), areaCoordFromBlockCoord(playerBlockCoordY));
-  log("%d, %d", playerBlockCoordX, playerBlockCoordY);
+  log("%d, %d", areaCoordFromBlockCoord(playerBlockCoordX), areaCoordFromBlockCoord(playerBlockCoordY));
+  //log("%d, %d", playerBlockCoordX, playerBlockCoordY);
   
   if (!areaMap.count(std::pair<int,int>(1, 1))) {
     addArea(context, 1, 1);
@@ -169,22 +169,20 @@ void Play::applyRules(Context &context)
 
 int Play::getBlockCoordX(Block &object)
 {
-  return ::floor(((object.getTransform()->position->x + screenScaleX) / blockWidth));
+  float rawBlockCoord = (object.getTransform()->position->x + screenScaleX) / blockWidth;
+  return rawBlockCoord >= 0 ? ::ceil(rawBlockCoord) : ::floor(rawBlockCoord);
 }
 
 int Play::getBlockCoordY(Block &object)
 {
-  return ::floor(((object.getTransform()->position->y + screenScaleY) / blockHeight));
+  float rawBlockCoord = (object.getTransform()->position->y + screenScaleY) / blockHeight;
+  return rawBlockCoord >= 0 ? ::ceil(rawBlockCoord) : ::floor(rawBlockCoord);
 }
 
 int Play::areaCoordFromBlockCoord(int blockCoord)
 {
-  if (blockCoord == 0) {
-    return 1;
-  }
-  
-  int correction = blockCoord > 0 ? 1 : 0;
-  return ::floor((float) blockCoord / (float) AREA_WIDTH_BLOCKS) + correction;
+  float rawAreaCoord = (float) blockCoord / AREA_WIDTH_BLOCKS;
+  return rawAreaCoord >= 0 ? ::ceil(rawAreaCoord) : ::floor(rawAreaCoord);
 }
 
 void Play::shutdown(Context &context)
