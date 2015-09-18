@@ -8,7 +8,7 @@
 #include <strug/states/Play.h>
 #include <strug/controls/StrugController.h>
 
-#define DEBUG_GENERATOR 1
+#define DEBUG_GENERATOR 0
 
 extern Strug::ResourceManager *game_resource_manager;
 
@@ -238,8 +238,12 @@ void Play::removeFarAreas(Context &context, int player_area_x, int player_area_y
   while (i != areaMap.end()) {
     std::pair<int,int> areaCoords = i->first;
     log("(%d, %d)", areaCoords.first, areaCoords.second);
-    
+
+#if DEBUG_GENERATOR
     if (areaCoords.first != player_area_x || areaCoords.second != player_area_y) {
+#else
+    if (abs(areaCoords.first - player_area_x) > 1 || abs(areaCoords.second - player_area_y) > 1) {
+#endif
       Area *area = i->second;
       
       for (int x = 0; x < area->getWidthInBlocks(); ++x) {
