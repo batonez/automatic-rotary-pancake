@@ -12,7 +12,7 @@
 
 extern Strug::ResourceManager *game_resource_manager;
 
-const float CollisionTest::BASE_RUNNING_SPEED = 0.3f;
+const float CollisionTest::BASE_RUNNING_SPEED = 0.00001f;
 
 class MazeController: public StrugController
 {
@@ -157,9 +157,15 @@ void CollisionTest::applyStartingRulesForBlock(Block &block, int block_x, int bl
 void CollisionTest::applyRules(Context &context)
 {
   // Moving player character
-  player->getTransform()->position->x += cameraMan.x * runningSpeed;
-  player->getTransform()->position->y += cameraMan.y * runningSpeed;
+  //player->getTransform()->position->x += cameraMan.x * runningSpeed * context.timer.getDeltaTime();
+  //player->getTransform()->position->y += cameraMan.y * runningSpeed * context.timer.getDeltaTime();
 
+//  player->getPhysicBody()->velocity.x = cameraMan.x * runningSpeed;
+//  player->getPhysicBody()->velocity.y = cameraMan.y * runningSpeed;
+  
+  player->getPhysicBody()->acceleration.x = cameraMan.x * runningSpeed;
+  player->getPhysicBody()->acceleration.y = cameraMan.y * runningSpeed;
+  
   context.renderer->camera.position->x = player->getTransform()->position->x;
   context.renderer->camera.position->y = player->getTransform()->position->y;
 }

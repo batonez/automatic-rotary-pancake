@@ -82,6 +82,10 @@ Character::Character():
     animationTimes[TELEPORT] = 800.0f;
     animationTimes[LEAP] = 600.0f;
   }
+  
+  physicBody.maxSpeed.set(0.005f, 0.005f, 0.005f);
+  physicBody.minSpeed.set(0.00001f, 0.00001f, 0.00001f);
+  physicBody.slowDown.set(0.00001f, 0.00001f, 0.00001f);
 }
 
 Character::~Character()
@@ -96,7 +100,6 @@ void Character::initialize(const std::string &texture_pack_name, float block_wid
 {
   if (!initialized) {
     Block::initialize(texture_pack_name, block_width, block_height);
-    log("SETTING CHARACTER PHYS BODY");
     setPhysicBody(physicBody);
  }
 }

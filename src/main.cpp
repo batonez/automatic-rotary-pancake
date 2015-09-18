@@ -49,7 +49,7 @@ class StandardDrawFrameHook : public DrawFrameHook
       
       if (context->getCurrentState() != NULL) {
         if (context->enableSimulator) {
-          //context->getSimulator()->stepSimulation(context->getDeltaTime());  
+          context->getSimulator()->stepSimulation(context->timer.getDeltaTime());  
         }
         
         if (context->enableCollisionDetector) {
