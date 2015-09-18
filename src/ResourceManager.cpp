@@ -7,7 +7,7 @@
 #include <glade/exception/GladeFileNotFoundException.h>
 #include <strug/exception/StrugException.h>
 #include <strug/LevelInfo.h>
-#include <strug/Area.h>
+#include <strug/BlockyArea.h>
 #include <strug/blocks/Block.h>
 #include <strug/blocks/Terrain.h>
 #include <strug/blocks/Player.h>
@@ -96,7 +96,7 @@ namespace Strug
         throw StrugException("Area data is invalid: line 1 must contain 3 values");
       }
       
-      result.reset(new Area(atoi(line->at(1).c_str()), atoi(line->at(2).c_str())));
+      result.reset(new BlockyArea(atoi(line->at(1).c_str()), atoi(line->at(2).c_str())));
 			++line;
 			
 			if (line->size() != 2) {

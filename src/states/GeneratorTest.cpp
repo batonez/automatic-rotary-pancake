@@ -1,5 +1,5 @@
 #include <glade/Context.h>
-#include <strug/Area.h>
+#include <strug/BlockyArea.h>
 #include <strug/ResourceManager.h>
 #include <strug/blocks/Terrain.h>
 #include <strug/blocks/Player.h>
@@ -216,7 +216,7 @@ void GeneratorTest::init(Context &context)
 void GeneratorTest::addArea(Context &context, int area_x, int area_y, MazeGenerator::CellType type)
 {
   log("GENERATING AREA (%d, %d)", area_x, area_y);
-  Area *area = new Area(Area::AREA_WIDTH_BLOCKS);
+  Area *area = new BlockyArea(Area::AREA_WIDTH_BLOCKS);
   generator.fillArea(area, area_x, area_y, type);
   
   // initializing blocks and their game mechanics

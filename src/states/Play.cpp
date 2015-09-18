@@ -1,7 +1,8 @@
 #include <algorithm>
 
 #include <glade/Context.h>
-#include <strug/Area.h>
+#include <strug/BlockyArea.h>
+#include <strug/MonolithArea.h>
 #include <strug/ResourceManager.h>
 #include <strug/blocks/Terrain.h>
 #include <strug/blocks/Player.h>
@@ -145,7 +146,11 @@ void Play::init(Context &context)
 
 void Play::applyStartingRulesForBlock(Block &block, int block_x, int block_y)
 {
-  block.getTransform()->setPosition(blockToWorldCoordX(block_x), blockToWorldCoordY(block_y), 0);
+  block.getTransform()->setPosition(
+    blockToWorldCoordX(block_x),
+    blockToWorldCoordY(block_y),
+    0
+  );
   
   if (block.getType() == Block::PLAYER) {
     block.setCollisionShape(kinematicColShape);
@@ -273,19 +278,35 @@ void Play::removeFarAreas(Context &context, int player_area_x, int player_area_y
 
 void Play::addArea(Context &context, int area_x, int area_y, MazeGenerator::CellType type)
 {
-  Area *area = new Area(Area::AREA_WIDTH_BLOCKS);
-  generator.fillArea(area, area_x, area_y, type);
+  Area *area = NULL;
   
-  // initializing blocks and their game mechanics
-  for (int blockX = 0; blockX < area->getWidthInBlocks(); ++blockX) {
-    for (int blockY = 0; blockY < area->getHeightInBlocks(); ++blockY) {
-      Area::Blocks *blocksInThisCell = area->getObjectsAt(blockX, blockY);
-      Area::Blocks::iterator block;
-      
-      for (block = blocksInThisCell->begin(); block != blocksInThisCell->end(); ++block) {
-        (*block)->initialize(area->texturePackName, blockWidth, blockHeight);
-        applyStartingRulesForBlock(**block, blockX + area_x * Area::AREA_WIDTH_BLOCKS, blockY + area_y * Area::AREA_WIDTH_BLOCKS);
-        context.add(*block);
+  if (type == MazeGenerator::PASSAGE_NO) {
+    area = new MonolithArea(Area::AREA_WIDTH_BLOCKS);
+    Area::Blocks *blocksInThisCell = area->getObjectsAt(0, 0);
+    Block *block = blocksInThisCell->at(0);
+    block->initialize(area->texturePackName, Area::AREA_WIDTH_BLOCKS * blockWidth, Area::AREA_WIDTH_BLOCKS * blockHeight);
+    applyStartingRulesForBlock(
+      *block, 
+      (Area::AREA_WIDTH_BLOCKS / 2) + area_x * Area::AREA_WIDTH_BLOCKS,
+      (Area::AREA_WIDTH_BLOCKS / 2) + area_y * Area::AREA_WIDTH_BLOCKS
+    );
+    
+    context.add(block);
+  } else {
+    area = new BlockyArea(Area::AREA_WIDTH_BLOCKS);
+    generator.fillArea(area, area_x, area_y, type);
+    
+    // initializing blocks and their game mechanics
+    for (int blockX = 0; blockX < area->getWidthInBlocks(); ++blockX) {
+      for (int blockY = 0; blockY < area->getHeightInBlocks(); ++blockY) {
+        Area::Blocks *blocksInThisCell = area->getObjectsAt(blockX, blockY);
+        Area::Blocks::iterator block;
+        
+        for (block = blocksInThisCell->begin(); block != blocksInThisCell->end(); ++block) {
+          (*block)->initialize(area->texturePackName, blockWidth, blockHeight);
+          applyStartingRulesForBlock(**block, blockX + area_x * Area::AREA_WIDTH_BLOCKS, blockY + area_y * Area::AREA_WIDTH_BLOCKS);
+          context.add(*block);
+        }
       }
     }
   }

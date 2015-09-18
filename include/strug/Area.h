@@ -14,7 +14,6 @@ namespace Strug
 class Vector2i;
 class Terrain;
 
-// TODO rename to Area
 class Area
 {
   friend class Strug::ResourceManager;
@@ -28,14 +27,10 @@ class Area
     
     static const int   AREA_WIDTH_BLOCKS;
     
-    BlocksMap         AreaData;
-    BlockTypesMap     blockTypesData;
     std::string       texturePackName;
     
-  private:
+  protected:
     int width, height;
-    std::map<int,Block*>      labeledBlocks; // may point to a deleted object. Always check AreaData first
-    std::map<int,Block::Type> coexistingBlockTypes; // (base block) -> (overlay block)
   
     // These are contents that are considered for all cells outside Area bounds
     Blocks      outOfBoundsCell;
@@ -44,16 +39,16 @@ class Area
   public:
     Area(int width, int height = 0);
     ~Area();
-    Blocks*  getObjectsAt(int x, int y);
-    Terrain* getTerrainAt(int x, int y);
-    bool isThereAnObjectOfType(Block::Type typeId, int blockX, int blockY);
+    virtual Blocks*  getObjectsAt(int x, int y) = 0;
+    virtual Terrain* getTerrainAt(int x, int y) = 0;
+    virtual bool isThereAnObjectOfType(Block::Type typeId, int blockX, int blockY) = 0;
     // Acquires ownership of the Block
-    void add(Block *object, int blockX, int blockY);
-    void remove(int blockX, int blockY);
-    BlockTypes* getObjectTypesAt(int x, int y);
+    virtual void add(Block *object, int blockX, int blockY) = 0;
+    virtual void remove(int blockX, int blockY) = 0;
+    virtual BlockTypes* getObjectTypesAt(int x, int y) = 0;
+    virtual Block* getBlockByLabel(int label) = 0;
     
-    int    getWidthInBlocks()            { return width; }
-    int    getHeightInBlocks()           { return height; }
-    bool   isThereATerrain(int x, int y) { return getTerrainAt(x, y) != NULL; }
-    Block* getBlockByLabel(int label)    { return labeledBlocks.at(label); }
+    virtual int    getWidthInBlocks()            { return width; }
+    virtual int    getHeightInBlocks()           { return height; }
+    virtual bool   isThereATerrain(int x, int y) { return getTerrainAt(x, y) != NULL; }
 };

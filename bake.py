@@ -20,6 +20,8 @@ os.path.join(os.environ['HATCHERY_SOURCES'], 'sha1'),
 baker.compilerSources = [
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'ResourceManager.cpp'),
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'Area.cpp'),
+os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'BlockyArea.cpp'),
+os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'MonolithArea.cpp'),
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'generator', 'WorldGenerator.cpp'),
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'generator', 'SimpleGenerator.cpp'),
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'generator', 'StraightPassage.cpp'),
