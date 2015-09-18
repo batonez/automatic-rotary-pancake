@@ -31,4 +31,5 @@ class MonolithArea: public Area
     virtual void remove(int blockX, int blockY);
     virtual BlockTypes* getObjectTypesAt(int x, int y);
     virtual Block* getBlockByLabel(int label);
+    virtual Area::Type getType() { return Area::AREA_MONOLITH; }
 };

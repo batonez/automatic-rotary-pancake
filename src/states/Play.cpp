@@ -144,6 +144,27 @@ void Play::init(Context &context)
   context.setController(*controller);
 }
 
+float Play::blockToWorldCoordXNotCentered(int blockX)
+{
+  return blockX * blockWidth - screenScaleX;
+}
+
+float Play::blockToWorldCoordYNotCentered(int blockY)
+{
+  return blockY * blockHeight - screenScaleY;
+}
+
+void Play::applyStartingRulesForMonolith(Block &block, int block_x, int block_y)
+{
+  block.getTransform()->setPosition(
+    blockToWorldCoordXNotCentered(block_x),
+    blockToWorldCoordYNotCentered(block_y),
+    0
+  );
+  
+  block.setCollisionShape(staticColShape);
+}
+
 void Play::applyStartingRulesForBlock(Block &block, int block_x, int block_y)
 {
   block.getTransform()->setPosition(
@@ -158,6 +179,8 @@ void Play::applyStartingRulesForBlock(Block &block, int block_x, int block_y)
     block.setCollisionShape(staticColShape);
   }
 }
+
+
 
 void Play::applyRules(Context &context)
 {
@@ -255,14 +278,24 @@ void Play::removeFarAreas(Context &context, int player_area_x, int player_area_y
 #endif
       Area *area = i->second;
       
-      for (int x = 0; x < area->getWidthInBlocks(); ++x) {
-        for (int y = 0; y < area->getHeightInBlocks(); ++y) {
-          Area::Blocks *blocksInThisCell = area->getObjectsAt(x, y);
-          Area::Blocks::iterator block;
-          
-          for (block = blocksInThisCell->begin(); block != blocksInThisCell->end(); ++block) {
-            context.remove(*block);
+      if (area->getType() == Area::AREA_BLOCKY) {
+        for (int x = 0; x < area->getWidthInBlocks(); ++x) {
+          for (int y = 0; y < area->getHeightInBlocks(); ++y) {
+            Area::Blocks *blocksInThisCell = area->getObjectsAt(x, y);
+            Area::Blocks::iterator block;
+            
+            for (block = blocksInThisCell->begin(); block != blocksInThisCell->end(); ++block) {
+              context.remove(*block);
+            }
           }
+        }
+      } else {
+        Area::Blocks *blocksInThisCell = area->getObjectsAt(0, 0);
+        Area::Blocks::iterator block;
+        
+        for (block = blocksInThisCell->begin(); block != blocksInThisCell->end(); ++block) {
+          log("REMOVING MONOLITH AREA AT: %d, %d", areaCoords.first, areaCoords.second);
+          context.remove(*block);
         }
       }
      
@@ -281,11 +314,12 @@ void Play::addArea(Context &context, int area_x, int area_y, MazeGenerator::Cell
   Area *area = NULL;
   
   if (type == MazeGenerator::PASSAGE_NO) {
+    log("ADDIN MONOLITH AREA AT %d, %d", area_x, area_y);
     area = new MonolithArea(Area::AREA_WIDTH_BLOCKS);
     Area::Blocks *blocksInThisCell = area->getObjectsAt(0, 0);
     Block *block = blocksInThisCell->at(0);
     block->initialize(area->texturePackName, Area::AREA_WIDTH_BLOCKS * blockWidth, Area::AREA_WIDTH_BLOCKS * blockHeight);
-    applyStartingRulesForBlock(
+    applyStartingRulesForMonolith(
       *block, 
       (Area::AREA_WIDTH_BLOCKS / 2) + area_x * Area::AREA_WIDTH_BLOCKS,
       (Area::AREA_WIDTH_BLOCKS / 2) + area_y * Area::AREA_WIDTH_BLOCKS

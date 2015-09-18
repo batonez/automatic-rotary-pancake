@@ -25,6 +25,12 @@ class Area
     typedef std::map<Vector2i,BlockTypes> BlockTypesMap;
     typedef std::map<Vector2i,Blocks>     BlocksMap;
     
+    enum Type
+    {
+      AREA_BLOCKY,
+      AREA_MONOLITH
+    };
+    
     static const int   AREA_WIDTH_BLOCKS;
     
     std::string       texturePackName;
@@ -47,6 +53,7 @@ class Area
     virtual void remove(int blockX, int blockY) = 0;
     virtual BlockTypes* getObjectTypesAt(int x, int y) = 0;
     virtual Block* getBlockByLabel(int label) = 0;
+    virtual Type getType() = 0;
     
     virtual int    getWidthInBlocks()            { return width; }
     virtual int    getHeightInBlocks()           { return height; }

@@ -39,4 +39,5 @@ class BlockyArea: public Area
     virtual BlockTypes* getObjectTypesAt(int x, int y);
     
     virtual Block* getBlockByLabel(int label)    { return labeledBlocks.at(label); }
+    virtual Area::Type getType() { return Area::AREA_BLOCKY; }
 };

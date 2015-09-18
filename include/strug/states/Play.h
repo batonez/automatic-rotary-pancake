@@ -59,7 +59,12 @@ class Play: public State
       {
         return blockY * blockHeight - screenScaleY + blockHeight / 2;
       }
-
+      
+      float blockToWorldCoordXNotCentered(int blockX); //
+      float blockToWorldCoordYNotCentered(int blockY); //
+      void applyStartingRulesForMonolith(Block &block, int block_x, int block_y); //
+      
+      
       int getBlockCoordX(Block &object);
       int getBlockCoordY(Block &object);
       int areaCoordFromBlockCoord(int blockCoord);
