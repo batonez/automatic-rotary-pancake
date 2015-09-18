@@ -2,6 +2,7 @@
 
 #include <map>
 
+#include <glade/physics/PhysicBody.h>
 #include <strug/blocks/Block.h>
 
 class Callable;
@@ -38,6 +39,7 @@ class Character: public Block
   protected:
     static std::map<Animation,float> animationTimes;
     Drawable *view;
+    PhysicBody physicBody;
     
   public:
     bool atLadder;
@@ -68,6 +70,7 @@ class Character: public Block
     
     Character();
     virtual ~Character();
+    virtual void initialize(const std::string &texture_pack_name, float block_width, float block_height);
     void resetIntentions();
     void faceLeft();
     void faceRight();

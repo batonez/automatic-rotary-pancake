@@ -92,6 +92,15 @@ Character::~Character()
   }
 }
 
+void Character::initialize(const std::string &texture_pack_name, float block_width, float block_height)
+{
+  if (!initialized) {
+    Block::initialize(texture_pack_name, block_width, block_height);
+    log("SETTING CHARACTER PHYS BODY");
+    setPhysicBody(physicBody);
+ }
+}
+
 void Character::resetIntentions()
 {
   wantsToGoRight = false;

@@ -4,6 +4,7 @@
 #include <glade/State.h>
 #include <glade/debug/log.h>
 #include <glade/physics/RectangleCollisionShape.h>
+#include <glade/physics/RectangleCollisionResolver.h>
 #include <strug/Level.h>
 #include <strug/generator/WorldGenerator.h>
 
@@ -11,8 +12,9 @@ class Context;
 class Block;
 class StrugController;
 class Player;
+class Terrain;
 
-class Play: public State
+class CollisionTest: public State
 {
   friend class MazeController;
   
@@ -25,20 +27,13 @@ class Play: public State
     Vector2i cameraMan;
     StrugController *controller;
     Player *player;
-    WorldGenerator generator;
-    AreaMap areaMap;
-    AreaMap deletedAreaMap;
+    Terrain *terrain;
     RectangleCollisionShape staticColShape, kinematicColShape;
-    
-    int
-      prevPlayerBlockCoordX,
-      prevPlayerBlockCoordY,
-      prevPlayerAreaCoordX,
-      prevPlayerAreaCoordY;
+    RectangleCollisionResolver resolver;
 
   public:
-    Play();
-    ~Play();
+    CollisionTest();
+    ~CollisionTest();
     
     virtual void init(Context &context);
     virtual void shutdown(Context &context);
@@ -59,7 +54,4 @@ class Play: public State
       int getBlockCoordY(Block &object);
       int areaCoordFromBlockCoord(int blockCoord);
       void applyStartingRulesForBlock(Block &block, int block_x, int block_y);
-      void addArea(Context &context, int area_x, int area_y, MazeGenerator::CellType type);
-      void addMoreAreas(Context &context, int area_x, int area_y);
-      void removeFarAreas(Context &context, int area_x, int area_y);
 };

@@ -30,6 +30,7 @@ os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'generator', 'commo
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'generator', 'MazeGenerator.cpp'),
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'states', 'GeneratorTest.cpp'),
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'states', 'MazeTest.cpp'),
+os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'states', 'CollisionTest.cpp'),
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'states', 'Play.cpp'),
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'blocks', 'Terrain.cpp'),
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'src', 'blocks', 'Block.cpp'),

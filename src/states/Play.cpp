@@ -12,7 +12,7 @@
 
 extern Strug::ResourceManager *game_resource_manager;
 
-const float Play::BASE_RUNNING_SPEED = 0.5f;
+const float Play::BASE_RUNNING_SPEED = 0.3f;
 
 class MazeController: public StrugController
 {
@@ -94,7 +94,9 @@ Play::Play():
   screenScaleY(0),
   controller(NULL),
   player(NULL),
-  generator(31337)
+  generator(),
+  staticColShape(CollisionShape::STATIC),
+  kinematicColShape(CollisionShape::KINEMATIC)
 {}
 
 Play::~Play()
@@ -130,14 +132,14 @@ void Play::init(Context &context)
   log("Spawn player at exit (area coords): %d, %d", exitCoords.first, exitCoords.second);
     
   // Create and initialize the player
-  Player *playerCharacter = new Player();
-  playerCharacter->initialize("common", blockWidth, blockHeight);
+  player = new Player();
+  player->initialize("common", blockWidth, blockHeight);
   prevPlayerBlockCoordX = Level::AREA_WIDTH_BLOCKS * exitCoords.first  + Level::AREA_WIDTH_BLOCKS  / 2;
   prevPlayerBlockCoordY = Level::AREA_WIDTH_BLOCKS * exitCoords.second + Level::AREA_WIDTH_BLOCKS / 2;
   prevPlayerAreaCoordX  = areaCoordFromBlockCoord(prevPlayerBlockCoordX);
   prevPlayerAreaCoordY  = areaCoordFromBlockCoord(prevPlayerBlockCoordY);
-  applyStartingRulesForBlock(*playerCharacter, prevPlayerBlockCoordX, prevPlayerBlockCoordY);
-  context.add(playerCharacter);
+  applyStartingRulesForBlock(*player, prevPlayerBlockCoordX, prevPlayerBlockCoordY);
+  context.add(player);
   
   addMoreAreas(context, prevPlayerAreaCoordX, prevPlayerAreaCoordY);
   
@@ -151,6 +153,9 @@ void Play::applyStartingRulesForBlock(Block &block, int block_x, int block_y)
   
   if (block.getType() == Block::PLAYER) {
     player = (Player*) &block;
+    block.setCollisionShape(kinematicColShape);
+  } else {
+    block.setCollisionShape(staticColShape);
   }
 }
 

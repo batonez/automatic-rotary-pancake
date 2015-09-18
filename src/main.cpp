@@ -19,6 +19,7 @@
 #include <strug/exception/StrugException.h>
 #include <strug/states/MazeTest.h>
 #include <strug/states/GeneratorTest.h>
+#include <strug/states/CollisionTest.h>
 #include <strug/states/Play.h>
 
 #define VIEWPORT_WIDTH 600
@@ -52,7 +53,7 @@ class StandardDrawFrameHook : public DrawFrameHook
         }
         
         if (context->enableCollisionDetector) {
-          //context->getCollisionDetector()->detectCollisions(context->getDeltaTime());
+          context->getCollisionDetector()->detectCollisions(context->timer.getDeltaTime());
         }
         
         if (context->enableAiContainer) {
@@ -70,7 +71,7 @@ class StandardDrawFrameHook : public DrawFrameHook
     virtual void onAfterDraw(void)
     {
       if (context->getCurrentState() != NULL) {
-      //  context->resetTimer();
+        context->timer.reset();
       }
     }
 };
@@ -241,7 +242,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
   HWND hWnd = CreateWindow(
       szWindowClass,
       szTitle,
-      WS_OVERLAPPEDWINDOW,
+      WS_OVERLAPPED | WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU,
       CW_USEDEFAULT, CW_USEDEFAULT,
       viewportRect.right - viewportRect.left,
       viewportRect.bottom - viewportRect.top,
@@ -366,7 +367,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
   StandardDrawFrameHook hook(*gameContext);
   renderer.addDrawFrameHook(hook);
 
-  gameContext->requestStateChange(std::unique_ptr<State>(new Play()));
+  gameContext->requestStateChange(std::unique_ptr<State>(new CollisionTest()));
   
   // The parameters to ShowWindow explained:
   // hWnd: the value returned from CreateWindow
