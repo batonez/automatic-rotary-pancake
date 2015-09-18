@@ -106,7 +106,7 @@ void CollisionTest::init(Context &context)
 {
   log("AREA WIDTH BLOCKS: %d", Area::AREA_WIDTH_BLOCKS);
   context.renderer->setBackgroundColor(0.0f, 0.0f, 0.0f);
-  context.renderer->setSceneProjectionMode(GladeRenderer::ORTHO);
+  context.renderer->setSceneProjectionMode(Glade::Renderer::ORTHO);
   //context.renderer->setDrawingOrderComparator(new Block.DrawingOrderComparator());
   
   screenScaleX = context.renderer->getViewportWidthCoords()  / 2;

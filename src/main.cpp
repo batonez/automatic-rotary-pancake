@@ -360,7 +360,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
   game_resource_manager = (Strug::ResourceManager *) resource_manager;
   
   // Create game context and renderer
-  GladeRenderer renderer;
+  Glade::Renderer renderer;
   renderer.onSurfaceCreated();
   renderer.onSurfaceChanged(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
   gameContext = new Context(&renderer);

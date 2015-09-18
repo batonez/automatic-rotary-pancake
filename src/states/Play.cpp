@@ -108,7 +108,7 @@ void Play::init(Context &context)
 {
   log("AREA WIDTH BLOCKS: %d", Area::AREA_WIDTH_BLOCKS);
   context.renderer->setBackgroundColor(0.0f, 0.0f, 0.0f);
-  context.renderer->setSceneProjectionMode(GladeRenderer::ORTHO);
+  context.renderer->setSceneProjectionMode(Glade::Renderer::ORTHO);
   //context.renderer->setDrawingOrderComparator(new Block.DrawingOrderComparator());
   
   screenScaleX = context.renderer->getViewportWidthCoords()  / 2;
@@ -219,7 +219,7 @@ void Play::applyRules(Context &context)
     
     if (playerMovedToAnotherArea) {
       removeFarAreas(context, playerAreaCoordX, playerAreaCoordY);
-      addMoreAreas(context, playerAreaCoordX, playerAreaCoordY);
+      //addMoreAreas(context, playerAreaCoordX, playerAreaCoordY);
       
       prevPlayerAreaCoordX = playerAreaCoordX;
       prevPlayerAreaCoordY = playerAreaCoordY;
@@ -279,6 +279,7 @@ void Play::removeFarAreas(Context &context, int player_area_x, int player_area_y
       Area *area = i->second;
       
       if (area->getType() == Area::AREA_BLOCKY) {
+        log("REMOVING BLOCKY AREA AT: %d, %d", areaCoords.first, areaCoords.second);
         for (int x = 0; x < area->getWidthInBlocks(); ++x) {
           for (int y = 0; y < area->getHeightInBlocks(); ++y) {
             Area::Blocks *blocksInThisCell = area->getObjectsAt(x, y);
@@ -293,12 +294,14 @@ void Play::removeFarAreas(Context &context, int player_area_x, int player_area_y
         Area::Blocks *blocksInThisCell = area->getObjectsAt(0, 0);
         Area::Blocks::iterator block;
         
+        log("REMOVING MONOLITH AREA AT: %d, %d", areaCoords.first, areaCoords.second);
         for (block = blocksInThisCell->begin(); block != blocksInThisCell->end(); ++block) {
-          log("REMOVING MONOLITH AREA AT: %d, %d", areaCoords.first, areaCoords.second);
+          log("1 BLOCK");
           context.remove(*block);
+          break;
         }
       }
-     
+      
       i = areaMap.erase(i);
       deletedAreaMap[areaCoords] = area;
     } else {
