@@ -25,15 +25,13 @@ class Area
     typedef std::vector<Block*>           Blocks;
     typedef std::map<Vector2i,BlockTypes> BlockTypesMap;
     typedef std::map<Vector2i,Blocks>     BlocksMap;
-    typedef std::map<std::string, int>    IntGenerationInfo;
     
     static const int   AREA_WIDTH_BLOCKS;
     
     BlocksMap         AreaData;
     BlockTypesMap     blockTypesData;
     std::string       texturePackName;
-    IntGenerationInfo intAttributes;
-  
+    
   private:
     int width, height;
     std::map<int,Block*>      labeledBlocks; // may point to a deleted object. Always check AreaData first

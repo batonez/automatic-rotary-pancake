@@ -132,15 +132,7 @@ void StraightPassage::createStraightPassage(
   }
 
   fill_stripe(area, 0, topTerrainHeight, bottomTerrainHeight, !horizontal, !horizontal);
-  
-  if (horizontal) {
-    area->intAttributes["left_exit_top_terrain_height"]    = topTerrainHeight;
-    area->intAttributes["left_exit_bottom_terrain_height"] = bottomTerrainHeight;
-  } else {
-    area->intAttributes["bottom_exit_left_terrain_width"]  = topTerrainHeight;
-    area->intAttributes["bottom_exit_right_terrain_width"] = bottomTerrainHeight;
-  }
-  
+    
   // generating the rest of the columns
   for (int i = 1; i < area->getWidthInBlocks(); ++i) {
     GENERATOR_LOG ("========= COL %d ============", i);
@@ -159,13 +151,5 @@ void StraightPassage::createStraightPassage(
     );
     
     fill_stripe(area, i, topTerrainHeight, bottomTerrainHeight, !horizontal, !horizontal);
-  }
-  
-  if (horizontal) {
-    area->intAttributes["right_exit_top_terrain_height"]    = topTerrainHeight;
-    area->intAttributes["right_exit_bottom_terrain_height"] = bottomTerrainHeight;
-  } else {
-    area->intAttributes["top_exit_left_terrain_width"]  = topTerrainHeight;
-    area->intAttributes["top_exit_right_terrain_width"] = bottomTerrainHeight;
   }
 }

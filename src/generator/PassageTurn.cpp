@@ -158,20 +158,6 @@ void PassageTurn::createPassageTurn(
 
   fill_stripe(area, 0, topTerrainHeight, bottomTerrainHeight, transpose, invert_x, invert_y);
   
-  if (!transpose && !invert_x && !invert_y) {
-    area->intAttributes["left_exit_top_terrain_height"]    = topTerrainHeight;
-    area->intAttributes["left_exit_bottom_terrain_height"] = bottomTerrainHeight;
-  } else if (invert_y) {
-    area->intAttributes["left_exit_top_terrain_height"]    = bottomTerrainHeight;
-    area->intAttributes["left_exit_bottom_terrain_height"] = topTerrainHeight;
-  } else if (invert_x) {
-    area->intAttributes["right_exit_top_terrain_height"]  = topTerrainHeight;
-    area->intAttributes["right_exit_bottom_terrain_height"] = bottomTerrainHeight;
-  } else if (transpose) {
-    area->intAttributes["top_exit_right_terrain_width"]  = bottomTerrainHeight;
-    area->intAttributes["top_exit_left_terrain_width"] = topTerrainHeight;
-  }
-  
   // generating the rest of the columns
   for (int i = 1; i < areaWidth; ++i) {
     GENERATOR_LOG ("========= COL %d ============", i);
@@ -190,19 +176,5 @@ void PassageTurn::createPassageTurn(
     );
     
     fill_stripe(area, i, topTerrainHeight, bottomTerrainHeight, transpose, invert_x, invert_y);
-  }
-  
-  if (!transpose && !invert_x && !invert_y) {
-    area->intAttributes["bottom_exit_right_terrain_width"] = to_right_width;
-    area->intAttributes["bottom_exit_left_terrain_width"]  = to_left_width;
-  } else if (invert_x) {
-    area->intAttributes["bottom_exit_right_terrain_width"] = to_left_width;
-    area->intAttributes["bottom_exit_left_terrain_width"]  = to_right_width;
-  } else if (invert_y) {
-    area->intAttributes["top_exit_right_terrain_width"]  = to_right_width;
-    area->intAttributes["top_exit_left_terrain_width"]   = to_left_width;
-  } else if (transpose) {
-    area->intAttributes["right_exit_top_terrain_height"]    = to_left_width;
-    area->intAttributes["right_exit_bottom_terrain_height"] = to_right_width;
   }
 }

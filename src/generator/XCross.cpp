@@ -198,9 +198,6 @@ void XCross::createPassageTurn(
 
   fill_stripe(area, 0, topTerrainHeight, bottomTerrainHeight);
   
-  area->intAttributes["left_exit_top_terrain_height"]    = topTerrainHeight;
-  area->intAttributes["left_exit_bottom_terrain_height"] = bottomTerrainHeight;
-  
   // generating the rest of the columns
   for (int i = 1; i < areaWidth; ++i) {
     GENERATOR_LOG ("========= COL %d ============", i);
@@ -224,11 +221,4 @@ void XCross::createPassageTurn(
     
     fill_stripe(area, i, topTerrainHeight, bottomTerrainHeight);
   }
-  
-  area->intAttributes["bottom_exit_right_terrain_width"]  = to_right_width_bottommost;
-  area->intAttributes["bottom_exit_left_terrain_width"]   = to_left_width_bottommost;
-  area->intAttributes["top_exit_right_terrain_width"]     = to_right_width_topmost;
-  area->intAttributes["top_exit_left_terrain_width"]      = to_left_width_topmost;
-  area->intAttributes["right_exit_top_terrain_height"]    = topTerrainHeight;
-  area->intAttributes["right_exit_bottom_terrain_height"] = bottomTerrainHeight;
 }
