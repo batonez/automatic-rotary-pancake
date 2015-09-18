@@ -8,11 +8,11 @@
 #include <strug/states/Play.h>
 #include <strug/controls/StrugController.h>
 
-#define DEBUG_GENERATOR 0
+#define DEBUG_GENERATOR 1
 
 extern Strug::ResourceManager *game_resource_manager;
 
-const float Play::BASE_RUNNING_SPEED = 0.3f;
+const float Play::BASE_RUNNING_SPEED = 0.00001f;
 
 class MazeController: public StrugController
 {
@@ -143,6 +143,8 @@ void Play::init(Context &context)
   
   addMoreAreas(context, prevPlayerAreaCoordX, prevPlayerAreaCoordY);
   
+  context.getCollisionDetector()->addListener(&resolver);
+  
   controller = new MazeController(context, *this);
   context.setController(*controller);
 }
@@ -152,7 +154,6 @@ void Play::applyStartingRulesForBlock(Block &block, int block_x, int block_y)
   block.getTransform()->setPosition(blockToWorldCoordX(block_x), blockToWorldCoordY(block_y), 0);
   
   if (block.getType() == Block::PLAYER) {
-    player = (Player*) &block;
     block.setCollisionShape(kinematicColShape);
   } else {
     block.setCollisionShape(staticColShape);
@@ -169,9 +170,13 @@ void Play::applyRules(Context &context)
   }
   
   // Moving player character
-  player->getTransform()->position->x += cameraMan.x * runningSpeed;
-  player->getTransform()->position->y += cameraMan.y * runningSpeed;
+//  player->getTransform()->position->x += cameraMan.x * runningSpeed;
+//  player->getTransform()->position->y += cameraMan.y * runningSpeed;
 
+  player->getPhysicBody()->acceleration.x = cameraMan.x * runningSpeed;
+  player->getPhysicBody()->acceleration.y = cameraMan.y * runningSpeed;
+  
+  // camera at the player
   context.renderer->camera.position->x = player->getTransform()->position->x;
   context.renderer->camera.position->y = player->getTransform()->position->y;
   

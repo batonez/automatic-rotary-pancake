@@ -4,6 +4,7 @@
 #include <glade/State.h>
 #include <glade/debug/log.h>
 #include <glade/physics/RectangleCollisionShape.h>
+#include <glade/physics/RectangleCollisionResolver.h>
 #include <strug/Level.h>
 #include <strug/generator/WorldGenerator.h>
 
@@ -29,6 +30,7 @@ class Play: public State
     AreaMap areaMap;
     AreaMap deletedAreaMap;
     RectangleCollisionShape staticColShape, kinematicColShape;
+    RectangleCollisionResolver resolver;
     
     int
       prevPlayerBlockCoordX,
