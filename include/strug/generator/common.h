@@ -1,6 +1,6 @@
 #pragma once
 
-#include <strug/Level.h>
+#include <strug/Area.h>
 
 #ifdef DEBUG_GENERATOR
 #define GENERATOR_LOG(...) log(...)

@@ -1,5 +1,5 @@
 #include <glade/Context.h>
-#include <strug/Level.h>
+#include <strug/Area.h>
 #include <strug/ResourceManager.h>
 #include <strug/blocks/Terrain.h>
 #include <strug/blocks/Player.h>
@@ -103,7 +103,7 @@ GeneratorTest::~GeneratorTest()
 
 void GeneratorTest::init(Context &context)
 {
-  log("AREA WIDTH BLOCKS: %d", Level::AREA_WIDTH_BLOCKS);
+  log("AREA WIDTH BLOCKS: %d", Area::AREA_WIDTH_BLOCKS);
   context.renderer->setBackgroundColor(0.0f, 0.0f, 0.0f);
   context.renderer->setSceneProjectionMode(GladeRenderer::ORTHO);
   //context.renderer->setDrawingOrderComparator(new Block.DrawingOrderComparator());
@@ -112,8 +112,8 @@ void GeneratorTest::init(Context &context)
   screenScaleY = context.renderer->getViewportHeightCoords() / 2;
   
   //blockWidth = blockHeight = min(
-  //  context.renderer->getViewportWidthCoords()  / Level::AREA_WIDTH_BLOCKS,
-  //  context.renderer->getViewportHeightCoords() / Level::AREA_WIDTH_BLOCKS
+  //  context.renderer->getViewportWidthCoords()  / Area::AREA_WIDTH_BLOCKS,
+  //  context.renderer->getViewportHeightCoords() / Area::AREA_WIDTH_BLOCKS
   //);
   
   blockWidth = blockHeight = 0.1f;
@@ -126,7 +126,7 @@ void GeneratorTest::init(Context &context)
   // Create and initialize the player
   Player *playerCharacter = new Player();
   playerCharacter->initialize("common", blockWidth, blockHeight);
-  int playerBlockCoord = Level::AREA_WIDTH_BLOCKS / 2;
+  int playerBlockCoord = Area::AREA_WIDTH_BLOCKS / 2;
   int playerAreaCoord  = areaCoordFromBlockCoord(playerBlockCoord);
   applyStartingRulesForBlock(*playerCharacter, playerBlockCoord, playerBlockCoord);
   prevPlayerBlockCoordX = prevPlayerBlockCoordY = playerBlockCoord;
@@ -216,18 +216,18 @@ void GeneratorTest::init(Context &context)
 void GeneratorTest::addArea(Context &context, int area_x, int area_y, MazeGenerator::CellType type)
 {
   log("GENERATING AREA (%d, %d)", area_x, area_y);
-  Area *area = new Area(Level::AREA_WIDTH_BLOCKS);
+  Area *area = new Area(Area::AREA_WIDTH_BLOCKS);
   generator.fillArea(area, area_x, area_y, type);
   
   // initializing blocks and their game mechanics
   for (int blockX = 0; blockX < area->getWidthInBlocks(); ++blockX) {
     for (int blockY = 0; blockY < area->getHeightInBlocks(); ++blockY) {
-      Level::Blocks *blocksInThisCell = area->getObjectsAt(blockX, blockY);
-      Level::Blocks::iterator block;
+      Area::Blocks *blocksInThisCell = area->getObjectsAt(blockX, blockY);
+      Area::Blocks::iterator block;
       
       for (block = blocksInThisCell->begin(); block != blocksInThisCell->end(); ++block) {
         (*block)->initialize(area->texturePackName, blockWidth, blockHeight);
-        applyStartingRulesForBlock(**block, blockX + area_x * Level::AREA_WIDTH_BLOCKS, blockY + area_y * Level::AREA_WIDTH_BLOCKS);
+        applyStartingRulesForBlock(**block, blockX + area_x * Area::AREA_WIDTH_BLOCKS, blockY + area_y * Area::AREA_WIDTH_BLOCKS);
         context.add(*block);
       }
     }
@@ -313,7 +313,7 @@ int GeneratorTest::getBlockCoordY(Block &object)
 
 int GeneratorTest::areaCoordFromBlockCoord(int blockCoord)
 {
-  return blockCoord ? ::floor((float) blockCoord / Level::AREA_WIDTH_BLOCKS) : 0;
+  return blockCoord ? ::floor((float) blockCoord / Area::AREA_WIDTH_BLOCKS) : 0;
 }
 
 void GeneratorTest::shutdown(Context &context)

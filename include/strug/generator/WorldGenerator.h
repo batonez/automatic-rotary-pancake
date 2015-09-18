@@ -1,6 +1,6 @@
 #pragma once
 
-#include <strug/Level.h>
+#include <strug/Area.h>
 #include <strug/generator/MazeGenerator.h>
 
 class WorldGenerator

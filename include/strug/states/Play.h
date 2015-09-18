@@ -5,17 +5,20 @@
 #include <glade/debug/log.h>
 #include <glade/physics/RectangleCollisionShape.h>
 #include <glade/physics/RectangleCollisionResolver.h>
-#include <strug/Level.h>
 #include <strug/generator/WorldGenerator.h>
 
 class Context;
 class Block;
 class StrugController;
 class Player;
+class Area;
 
 class Play: public State
 {
-  friend class MazeController;
+  friend class PlayController;
+
+  // FIXME Maybe it should be hash table?
+  typedef std::map< std::pair<int, int>, Area* > AreaMap;
   
   private:
     static const float BASE_RUNNING_SPEED;

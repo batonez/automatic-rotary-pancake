@@ -3,7 +3,6 @@
 #include <glade/GladeObject.h>
 #include <glade/State.h>
 #include <glade/debug/log.h>
-#include <strug/Level.h>
 #include <strug/generator/MazeGenerator.h>
 
 class Context;

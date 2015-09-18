@@ -3,7 +3,7 @@
 #include <string>
 #include <strug/blocks/Block.h>
 
-class Level;
+class Area;
 
 class Terrain: public Block
 {

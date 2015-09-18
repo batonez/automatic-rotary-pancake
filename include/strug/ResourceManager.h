@@ -9,7 +9,7 @@
 #include <glade/math/Vector.h>
 
 struct LevelPackInfo;
-class  Level;
+class  Area;
 
 namespace Strug
 {
@@ -25,7 +25,7 @@ namespace Strug
       ResourceManager(FileManager *file_manager);
       int getNumberOfLevelPacks();
       std::shared_ptr<LevelPackInfo> getLevelPackInfo(int index);
-      std::shared_ptr<Level> getLevel(Path &filename);
+      std::shared_ptr<Area> getLevel(Path &filename);
       std::shared_ptr<Texture> getTexture(const std::string texture_pack_name, const Path &image_filename,
         const Path &texture_data_filename, bool use_nulltexture = true);
       

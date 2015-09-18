@@ -15,7 +15,7 @@ class Vector2i;
 class Terrain;
 
 // TODO rename to Area
-class Level
+class Area
 {
   friend class Strug::ResourceManager;
   friend class WorldGenerator;
@@ -29,23 +29,23 @@ class Level
     
     static const int   AREA_WIDTH_BLOCKS;
     
-    BlocksMap         levelData;
+    BlocksMap         AreaData;
     BlockTypesMap     blockTypesData;
     std::string       texturePackName;
     IntGenerationInfo intAttributes;
   
   private:
     int width, height;
-    std::map<int,Block*>      labeledBlocks; // may point to a deleted object. Always check levelData first
+    std::map<int,Block*>      labeledBlocks; // may point to a deleted object. Always check AreaData first
     std::map<int,Block::Type> coexistingBlockTypes; // (base block) -> (overlay block)
   
-    // These are contents that are considered for all cells outside level bounds
+    // These are contents that are considered for all cells outside Area bounds
     Blocks      outOfBoundsCell;
     BlockTypes  outOfBoundsBlockTypes;
     
   public:
-    Level(int width, int height = 0);
-    ~Level();
+    Area(int width, int height = 0);
+    ~Area();
     Blocks*  getObjectsAt(int x, int y);
     Terrain* getTerrainAt(int x, int y);
     bool isThereAnObjectOfType(Block::Type typeId, int blockX, int blockY);
@@ -59,8 +59,3 @@ class Level
     bool   isThereATerrain(int x, int y) { return getTerrainAt(x, y) != NULL; }
     Block* getBlockByLabel(int label)    { return labeledBlocks.at(label); }
 };
-
-typedef Level Area;
-
-// FIXME Maybe it should be hash table?
-typedef std::map< std::pair<int, int>, Area* > AreaMap;

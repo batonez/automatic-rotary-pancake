@@ -1,6 +1,6 @@
 #pragma once
 
-#include <strug/Level.h>
+#include <strug/Area.h>
 class Vector2i;
 
 class PassageTurn

@@ -7,7 +7,7 @@
 #include <glade/exception/GladeFileNotFoundException.h>
 #include <strug/exception/StrugException.h>
 #include <strug/LevelInfo.h>
-#include <strug/Level.h>
+#include <strug/Area.h>
 #include <strug/blocks/Block.h>
 #include <strug/blocks/Terrain.h>
 #include <strug/blocks/Player.h>
@@ -74,10 +74,10 @@ namespace Strug
     }
   }
   
-  std::shared_ptr<Level> ResourceManager::getLevel(Path &filename)
+  std::shared_ptr<Area> ResourceManager::getLevel(Path &filename)
   {
     // FIXME! Use cache
-    std::shared_ptr<Level> result;
+    std::shared_ptr<Area> result;
     
     std::ifstream levelDataStream;
     fileManager->getFileContents(LEVELS_SUBDIRECTORY + filename, levelDataStream);
@@ -87,20 +87,20 @@ namespace Strug
 		
     try {
       if (rawLevelData.size() < 3) {
-        throw StrugException("Level data is invalid: file is less than 3 lines");
+        throw StrugException("Area data is invalid: file is less than 3 lines");
       }
       
       std::vector<std::vector<std::string> >::iterator line = rawLevelData.begin();
 		
       if (line->size() != 3) {
-        throw StrugException("Level data is invalid: line 1 must contain 3 values");
+        throw StrugException("Area data is invalid: line 1 must contain 3 values");
       }
       
-      result.reset(new Level(atoi(line->at(1).c_str()), atoi(line->at(2).c_str())));
+      result.reset(new Area(atoi(line->at(1).c_str()), atoi(line->at(2).c_str())));
 			++line;
 			
 			if (line->size() != 2) {
-				throw StrugException("Level data is invalid: line 2 must contain 2 values");
+				throw StrugException("Area data is invalid: line 2 must contain 2 values");
 			}
 
 			result->texturePackName = line->at(1);
@@ -151,7 +151,7 @@ namespace Strug
               }
 						}
 					} else {
-						throw StrugException("Level data is invalid: not enough lines for the given level size");
+						throw StrugException("Area data is invalid: not enough lines for the given level size");
 					}
 				}
 			}

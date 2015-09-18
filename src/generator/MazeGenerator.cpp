@@ -2,7 +2,7 @@
 #include <assert.h>
 
 #include <glade/math/util.h>
-#include <strug/Level.h>
+#include <strug/Area.h>
 #include <strug/ResourceManager.h>
 #include <strug/blocks/Terrain.h>
 #include <strug/blocks/Player.h>

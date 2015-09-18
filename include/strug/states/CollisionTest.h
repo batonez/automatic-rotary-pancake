@@ -5,7 +5,7 @@
 #include <glade/debug/log.h>
 #include <glade/physics/RectangleCollisionShape.h>
 #include <glade/physics/RectangleCollisionResolver.h>
-#include <strug/Level.h>
+#include <strug/Area.h>
 #include <strug/generator/WorldGenerator.h>
 
 class Context;

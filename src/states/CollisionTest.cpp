@@ -1,7 +1,7 @@
 #include <algorithm>
 
 #include <glade/Context.h>
-#include <strug/Level.h>
+#include <strug/Area.h>
 #include <strug/ResourceManager.h>
 #include <strug/blocks/Terrain.h>
 #include <strug/blocks/Player.h>
@@ -104,7 +104,7 @@ CollisionTest::~CollisionTest()
 
 void CollisionTest::init(Context &context)
 {
-  log("AREA WIDTH BLOCKS: %d", Level::AREA_WIDTH_BLOCKS);
+  log("AREA WIDTH BLOCKS: %d", Area::AREA_WIDTH_BLOCKS);
   context.renderer->setBackgroundColor(0.0f, 0.0f, 0.0f);
   context.renderer->setSceneProjectionMode(GladeRenderer::ORTHO);
   //context.renderer->setDrawingOrderComparator(new Block.DrawingOrderComparator());
@@ -113,8 +113,8 @@ void CollisionTest::init(Context &context)
   screenScaleY = context.renderer->getViewportHeightCoords() / 2;
   
   //blockWidth = blockHeight = min(
-  //  context.renderer->getViewportWidthCoords()  / Level::AREA_WIDTH_BLOCKS,
-  //  context.renderer->getViewportHeightCoords() / Level::AREA_WIDTH_BLOCKS
+  //  context.renderer->getViewportWidthCoords()  / Area::AREA_WIDTH_BLOCKS,
+  //  context.renderer->getViewportHeightCoords() / Area::AREA_WIDTH_BLOCKS
   //);
   
   blockWidth = blockHeight = 0.1f;
@@ -137,7 +137,7 @@ void CollisionTest::init(Context &context)
   applyStartingRulesForBlock(*terrain, 4, 4);
   context.add(terrain);
   
-  context.getCollisionDetector()->addListener(&resolver);
+  //context.getCollisionDetector()->addListener(&resolver);
   
   controller = new MazeController(context, *this);
   context.setController(*controller);
@@ -182,7 +182,7 @@ int CollisionTest::getBlockCoordY(Block &object)
 
 int CollisionTest::areaCoordFromBlockCoord(int blockCoord)
 {
-  return blockCoord ? ::floor((float) blockCoord / Level::AREA_WIDTH_BLOCKS) : 0;
+  return blockCoord ? ::floor((float) blockCoord / Area::AREA_WIDTH_BLOCKS) : 0;
 }
 
 void CollisionTest::shutdown(Context &context)

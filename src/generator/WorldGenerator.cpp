@@ -8,7 +8,7 @@
 
 #include <glade/debug/log.h>
 #include <glade/math/vector.h>
-#include <strug/Level.h>
+#include <strug/Area.h>
 #include <strug/blocks/Terrain.h>
 #include <strug/generator/WorldGenerator.h>
 #include <strug/exception/StrugException.h>
