@@ -3,7 +3,7 @@ import baker
 
 ######################## Dependencies
 baker.compileDependencies = [
-os.path.join(os.environ['HATCHERY_SOURCES'], 'Gladen'),
+os.path.join(os.environ['HATCHERY_SOURCES'], 'glade'),
 os.path.join(os.environ['HATCHERY_SOURCES'], 'lodepng'),
 ]
 
@@ -12,7 +12,7 @@ baker.compilerOutputDir = os.path.join(os.environ['HATCHERY_BUILDS'], 'strug', '
 
 baker.compilerIncludes.extend([
 os.path.join(os.environ['HATCHERY_SOURCES'], 'strug'  , 'include'),
-os.path.join(os.environ['HATCHERY_SOURCES'], 'Gladen' , 'include'),
+os.path.join(os.environ['HATCHERY_SOURCES'], 'glade' , 'include'),
 os.path.join(os.environ['HATCHERY_TOOLS']  , 'OpenGL' , 'include'),
 os.path.join(os.environ['HATCHERY_SOURCES'], 'sha1'),
 ])
@@ -56,7 +56,7 @@ baker.linkerObjects = [
 'Opengl32.lib',
 'DbgHelp.lib',
 'freetype.lib',
-os.path.join(os.environ['HATCHERY_BUILDS'], 'Gladen', '*.obj'),
+os.path.join(os.environ['HATCHERY_BUILDS'], 'glade', '*.obj'),
 os.path.join(os.environ['HATCHERY_BUILDS'], 'strug', 'obj', '*.obj'),
 os.path.join(os.environ['HATCHERY_BUILDS'], 'lodepng', '*.obj'),
 ]
@@ -69,4 +69,4 @@ baker.linkExe()
 
 ######################## Copy FIXME baker copy function should copy file-by-file
 baker.copyDir(os.path.join(os.environ['HATCHERY_SOURCES'], 'strug', 'assets'), os.path.join(os.environ['HATCHERY_BUILDS'], 'strug', 'assets'))
-baker.copyDir(os.path.join(os.environ['HATCHERY_SOURCES'], 'Gladen', 'res'), os.path.join(os.environ['HATCHERY_BUILDS'], 'strug', 'assets'))
+baker.copyDir(os.path.join(os.environ['HATCHERY_SOURCES'], 'glade', 'res'), os.path.join(os.environ['HATCHERY_BUILDS'], 'strug', 'assets'))
