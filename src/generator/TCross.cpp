@@ -3,7 +3,7 @@
 #include <assert.h>
 
 #include <glade/debug/log.h>
-#include <glade/math/vector.h>
+#include <glade/math/Vector.h>
 #include <strug/generator/TCross.h>
 #include <strug/blocks/Terrain.h>
 #include <strug/exception/StrugException.h>

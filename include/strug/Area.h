@@ -44,7 +44,7 @@ class Area
     
   public:
     Area(int width, int height = 0);
-    ~Area();
+    virtual ~Area();
     virtual Blocks*  getObjectsAt(int x, int y) = 0;
     virtual Terrain* getTerrainAt(int x, int y) = 0;
     virtual bool isThereAnObjectOfType(Block::Type typeId, int blockX, int blockY) = 0;

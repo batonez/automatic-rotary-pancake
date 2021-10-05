@@ -4,10 +4,10 @@
 #include <assert.h>
 #include <limits.h>
 
-#include <sha1.h>
+#include <sha1.hpp>
 
 #include <glade/debug/log.h>
-#include <glade/math/vector.h>
+#include <glade/math/Vector.h>
 #include <strug/Area.h>
 #include <strug/blocks/Terrain.h>
 #include <strug/generator/WorldGenerator.h>
@@ -53,7 +53,10 @@ static unsigned int getAreaSeed(long seed_param, int x_param, int y_param)
     unsigned int combinedSeed;
   } result;
   
-  sha1::calc(&data, sizeof(data), result.chars);
+  SHA1_CTX ctx;
+  SHA1Init(&ctx);
+  SHA1Update(&ctx, (unsigned char*) &data, sizeof(data));
+  SHA1Final(result.chars, &ctx);
 
   return result.combinedSeed;
 }

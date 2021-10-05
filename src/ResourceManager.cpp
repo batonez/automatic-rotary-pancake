@@ -1,5 +1,3 @@
-#pragma once
-
 #include <sstream>
 
 #include <glade/util/CSVReader.h>
@@ -131,7 +129,7 @@ namespace Strug
               Block *object = NULL;
               
               switch (blockType) {
-                case 0:
+                case Block::EMPTY:
                   // no block created
                   break;
                 case Block::TERRAIN:

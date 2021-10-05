@@ -163,8 +163,8 @@ void MazeTest::applyRules(Context &context)
   player->getTransform()->position->x += cameraMan.x * runningSpeed;
   player->getTransform()->position->y += cameraMan.y * runningSpeed;
 
-  context.renderer->camera.position->x = player->getTransform()->position->x;
-  context.renderer->camera.position->y = player->getTransform()->position->y;
+  context.renderer->getCamera()->position->x = player->getTransform()->position->x;
+  context.renderer->getCamera()->position->y = player->getTransform()->position->y;
 }
 
 int MazeTest::getBlockCoordX(Block &object)

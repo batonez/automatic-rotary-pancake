@@ -11,6 +11,7 @@ class Block : public GladeObject
 
   public:
     enum Type {
+      EMPTY   = 0,
       TERRAIN = 1,
       PLAYER  = 6,
     };
@@ -29,6 +30,7 @@ class Block : public GladeObject
     static int getDrawingOrder(Block *block);
         
     Block(Properties *properties = NULL);
+    virtual ~Block() {};
     
     virtual Type  getType() const   = 0;
     virtual bool isOverlapChecked() = 0;

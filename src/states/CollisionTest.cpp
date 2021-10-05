@@ -166,8 +166,8 @@ void CollisionTest::applyRules(Context &context)
   player->getPhysicBody()->acceleration.x = cameraMan.x * runningSpeed;
   player->getPhysicBody()->acceleration.y = cameraMan.y * runningSpeed;
   
-  context.renderer->camera.position->x = player->getTransform()->position->x;
-  context.renderer->camera.position->y = player->getTransform()->position->y;
+  context.renderer->getCamera()->position->x = player->getTransform()->position->x;
+  context.renderer->getCamera()->position->y = player->getTransform()->position->y;
 }
 
 int CollisionTest::getBlockCoordX(Block &object)

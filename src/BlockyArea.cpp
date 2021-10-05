@@ -120,7 +120,7 @@ void BlockyArea::add(Block *object, int blockX, int blockY)
   blockTypesInThisCell->push_back(object->getType());
   i = blocksInThisCell->end() - 1;
   
-  if (object->getLabel() != NULL) {
+  if (object->getLabel() != 0) {
     labeledBlocks[object->getLabel()] = *i;
   }
 }

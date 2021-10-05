@@ -1,6 +1,7 @@
 #include <algorithm>
 
 #include <glade/Context.h>
+#include <glade/render/Perception.h>
 #include <strug/BlockyArea.h>
 #include <strug/MonolithArea.h>
 #include <strug/ResourceManager.h>
@@ -107,9 +108,10 @@ Play::~Play()
 void Play::init(Context &context)
 {
   log("AREA WIDTH BLOCKS: %d", Area::AREA_WIDTH_BLOCKS);
-  context.renderer->setBackgroundColor(0.0f, 0.0f, 0.0f);
+  context.renderer->setBackgroundColor(0.0f, 1.0f, 0.0f);
   context.renderer->setSceneProjectionMode(Glade::Renderer::ORTHO);
   //context.renderer->setDrawingOrderComparator(new Block.DrawingOrderComparator());
+  context.renderer->setPerception(new Perception());
   
   screenScaleX = context.renderer->getViewportWidthCoords()  / 2;
   screenScaleY = context.renderer->getViewportHeightCoords() / 2;
@@ -128,20 +130,24 @@ void Play::init(Context &context)
     
   // Create and initialize the player
   player = new Player();
+  /*
   player->initialize("common", blockWidth, blockHeight);
   prevPlayerBlockCoordX = Area::AREA_WIDTH_BLOCKS * exitCoords.first  + Area::AREA_WIDTH_BLOCKS  / 2;
   prevPlayerBlockCoordY = Area::AREA_WIDTH_BLOCKS * exitCoords.second + Area::AREA_WIDTH_BLOCKS / 2;
   prevPlayerAreaCoordX  = areaCoordFromBlockCoord(prevPlayerBlockCoordX);
   prevPlayerAreaCoordY  = areaCoordFromBlockCoord(prevPlayerBlockCoordY);
   applyStartingRulesForBlock(*player, prevPlayerBlockCoordX, prevPlayerBlockCoordY);
+  */
   context.add(player);
-  
+  /*
   addMoreAreas(context, prevPlayerAreaCoordX, prevPlayerAreaCoordY);
   
   context.getCollisionDetector()->addListener(&resolver);
   
   controller = new PlayController(context, *this);
   context.setController(*controller);
+  */
+  log("Play state init complete");
 }
 
 float Play::blockToWorldCoordXNotCentered(int blockX)
@@ -192,15 +198,19 @@ void Play::applyRules(Context &context)
   }
   
   // Moving player character
-//  player->getTransform()->position->x += cameraMan.x * runningSpeed;
-//  player->getTransform()->position->y += cameraMan.y * runningSpeed;
+  player->getTransform()->position->x += cameraMan.x * runningSpeed;
+  player->getTransform()->position->y += cameraMan.y * runningSpeed;
 
-  player->getPhysicBody()->acceleration.x = cameraMan.x * runningSpeed;
-  player->getPhysicBody()->acceleration.y = cameraMan.y * runningSpeed;
+  if (player->getPhysicBody()) {
+    player->getPhysicBody()->acceleration.x = cameraMan.x * runningSpeed;
+    player->getPhysicBody()->acceleration.y = cameraMan.y * runningSpeed;
+  }
   
   // camera at the player
-  context.renderer->camera.position->x = player->getTransform()->position->x;
-  context.renderer->camera.position->y = player->getTransform()->position->y;
+  if (context.renderer->getCamera() != nullptr) {
+    context.renderer->getCamera()->position->x = player->getTransform()->position->x;
+    context.renderer->getCamera()->position->y = player->getTransform()->position->y;
+  }
   
   int playerBlockCoordX = getBlockCoordX(*player);
   int playerBlockCoordY = getBlockCoordY(*player);
@@ -241,7 +251,7 @@ void Play::addMoreAreas(Context &context, int area_x, int area_y)
   int areaXTo   = area_x + 1;
   int areaYFrom = area_y - 1;
   int areaYTo   = area_y + 1;
-#endif DEBUG_GENERATOR
+#endif // DEBUG_GENERATOR
   for (int i = areaXFrom; i <= areaXTo; ++i) {
     for (int j = areaYFrom; j <= areaYTo; ++j) {
       if (!areaMap.count(std::pair<int,int>(i, j))) {
